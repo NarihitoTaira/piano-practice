@@ -68,8 +68,8 @@ body.midi-on:not(.show-keys) .play svg{max-height:none}
 .counts button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
 .counts button:disabled{opacity:.5;cursor:default}
 .keys button.sel{background:var(--accent);border-color:var(--accent);color:var(--paper)}
-.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.modes button{font-size:13px;padding:9px 4px}
+.modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.modes button{font-size:13px;padding:9px 2px;white-space:nowrap}
 .modes button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
 .modes button:disabled{opacity:.5;cursor:default}
 .card{background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:12px 12px 14px;display:flex;flex-direction:column;gap:8px}
@@ -145,9 +145,10 @@ svg{display:block;width:100%;height:auto}
   </div>
 
   <div class="modes" role="group" aria-label="出題範囲">
-    <button id="m-r" data-m="r" aria-pressed="true">右手（ト音）</button>
-    <button id="m-l" data-m="l" aria-pressed="false">左手（ヘ音）</button>
+    <button id="m-r" data-m="r" aria-pressed="true">右手</button>
+    <button id="m-l" data-m="l" aria-pressed="false">左手</button>
     <button id="m-b" data-m="b" aria-pressed="false">両方まぜる</button>
+    <button id="m-h" data-m="h" aria-pressed="false">両手同時</button>
   </div>
 
   <div class="counts" role="group" aria-label="音の数">
@@ -221,6 +222,7 @@ svg{display:block;width:100%;height:auto}
   </div>
 
   <ul class="tips">
+    <li>「両手同時」は、ト音記号（右手）とヘ音記号（左手）の音が同時に出ます。キーボードなら両手で同時に弾けばOK。画面のボタンで答えるときは、右手の音→左手の音の順に押します</li>
     <li>右手の目印：下から2本目の線＝ソ、真ん中の間＝高いド</li>
     <li>左手の目印：一番上の間＝ソ、一番上の線＝ラ</li>
     <li>電子キーボードで答えるときは、楽譜と同じ高さの鍵盤を弾きます（真ん中のドは鍵盤の左から3つ目のド）。1オクターブずれるとミスになります</li>
@@ -233,7 +235,7 @@ svg{display:block;width:100%;height:auto}
 const LABELS=['ド','レ','ミ','ファ','ソ','ラ','シ','高いド'];
 const BTN=['ド','レ','ミ','ファ','ソ','ラ','シ','高い<br>ド'];
 const POOL={t:[28,29,30,31,32,33,34,35],b:[21,22,23,24,25,26]}; // C4..C5 / C3..A3
-const MODE_NAME={r:'右手',l:'左手',b:'両方'};
+const MODE_NAME={r:'右手',l:'左手',b:'両方',h:'両手同時'};
 const LIMIT=60, BONUS_EVERY=10, BONUS_SEC=1;
 let mode='r',cur=null,ok=0,ng=0,streak=0,maxStreak=0,bonus=0,ctx=null,pending=null;
 let running=false,cdTimers=[],endAt=0,raf=0,maxShown=LIMIT;
@@ -248,14 +250,15 @@ function beep(f,len=0.6,vol=0.3){try{if(!ctx)ctx=new (window.AudioContext||windo
   const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.value=f;
   g.gain.setValueAtTime(vol,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+len);
   o.connect(g).connect(ctx.destination);o.start();o.stop(ctx.currentTime+len+0.02)}catch(e){}}
-function idxOf(c,d){return (c==='t'&&d===35)?7:d%7}
-function namesOf(c,ds){return ds.map(d=>LABELS[idxOf(c,d)]).join('＋')}
+function idxOf(c,d){return (c!=='b'&&d===35)?7:d%7}
+function namesOf(c,ds){if(c==='h'&&cur&&cur.parts)return cur.parts.map(p=>(p.c==='t'?'右':'左')+' '+p.ds.map(d=>LABELS[idxOf(p.c,d)]).join('＋')).join('／');return ds.map(d=>LABELS[idxOf(c,d)]).join('＋')}
 // 大譜表：上がト音記号（右手）、下がヘ音記号（左手）
 const STAFF={t:{yb:92,bottom:30,name:'ト音'},b:{yb:180,bottom:18,name:'ヘ音'}};
-function draw(ds,clef,big){
+function draw(ds,clef,big,parts){
+  if(ds!=null&&!parts)parts=[{c:clef,ds}];
   const line=tok('--line'),mut=tok('--muted'),acc=tok('--accent'),gap=12;let s='';
   const dim=ds==null?0.35:1;
-  ['t','b'].forEach(k=>{const yb=STAFF[k].yb,active=ds!=null&&k===clef;
+  ['t','b'].forEach(k=>{const yb=STAFF[k].yb,active=ds!=null&&parts.some(p=>p.c===k);
     for(let i=0;i<5;i++){const y=yb-i*gap;s+=`<line x1="24" y1="${y}" x2="320" y2="${y}" stroke="${line}" stroke-width="1" opacity="${ds==null?dim:(active?1:0.45)}"/>`}
     s+=`<text x="32" y="${yb-2*gap+5}" font-size="13" fill="${mut}" opacity="${ds==null||active?1:0.55}">${STAFF[k].name}</text>`});
   // 左端のつなぎ線と波かっこ
@@ -264,6 +267,7 @@ function draw(ds,clef,big){
   if(ds==null){
     if(big!=null)s+=`<text x="172" y="${(STAFF.t.yb+STAFF.b.yb-4*gap)/2+18}" font-size="52" font-weight="700" text-anchor="middle" fill="${acc}">${big}</text>`;
     $('staff').innerHTML=s;return}
+  parts.forEach(({c:clef,ds})=>{
   const yb=STAFF[clef].yb,bottom=STAFF[clef].bottom;
   const x=200,steps=ds.map(d=>d-bottom).sort((a,b)=>a-b),lo=steps[0],hi=steps[steps.length-1];
   const Y=st=>yb-st*gap/2;
@@ -277,14 +281,18 @@ function draw(ds,clef,big){
   const sx=up?x+7:x-7;
   s+=up?`<line x1="${sx}" y1="${Y(lo)}" x2="${sx}" y2="${Y(hi)-34}" stroke="${acc}" stroke-width="1.5"/>`
        :`<line x1="${sx}" y1="${Y(hi)}" x2="${sx}" y2="${Y(lo)+34}" stroke="${acc}" stroke-width="1.5"/>`;
-  s+=`<text x="318" y="18" font-size="12" text-anchor="end" fill="${mut}">${clef==='t'?'右手':'左手'}${count===2?'・2音':''}</text>`;
+  });
+  s+=`<text x="318" y="18" font-size="12" text-anchor="end" fill="${mut}">${parts.length>1?'両手':parts[0].c==='t'?'右手':'左手'}${count===2?'・2音':''}</text>`;
   $('staff').innerHTML=s}
 function pick(p){return p[Math.floor(Math.random()*p.length)]}
 function next(){pending=null;if(!running)return;sel=[];pressed=new Set();markSel();
+  const gen=p=>{for(;;){if(count===1)return [pick(p)];const a=pick(p);const cands=p.filter(b=>b>a&&b-a<=4);if(cands.length)return [a,pick(cands)]}};
+  if(mode==='h'){let parts,ds;
+    do{parts=[{c:'t',ds:gen(POOL.t)},{c:'b',ds:gen(POOL.b)}];ds=[...parts[0].ds,...parts[1].ds]}
+    while(cur&&cur.c==='h'&&cur.ds.join()===ds.join());
+    cur={ds,c:'h',parts};draw(ds,'h',null,parts);qT0=performance.now();return}
   const clef=mode==='b'?(Math.random()<.5?'t':'b'):(mode==='r'?'t':'b');const p=POOL[clef];let ds;
-  do{if(count===1)ds=[pick(p)];
-     else{const a=pick(p);const cands=p.filter(b=>b>a&&b-a<=4);if(!cands.length){ds=null;continue}ds=[a,pick(cands)]}}
-  while(!ds||(cur&&cur.c===clef&&cur.ds.join()===ds.join()));
+  do{ds=gen(p)}while(cur&&cur.c===clef&&cur.ds.join()===ds.join());
   cur={ds,c:clef};draw(ds,clef);qT0=performance.now()}
 function setKeys(on){document.querySelectorAll('.keys button').forEach(b=>b.disabled=!on)}
 function setModes(on){document.querySelectorAll('.modes button, .games button, .counts button').forEach(b=>b.disabled=!on)}
@@ -342,6 +350,16 @@ function finish(){finishedAt=performance.now();running=false;cancelAnimationFram
 function markSel(){document.querySelectorAll('.keys button').forEach((b,i)=>b.classList.toggle('sel',sel.includes(i)))}
 function answer(i){if(!running||!cur||pending)return;
   const want=cur.ds.map(d=>idxOf(cur.c,d));
+  if(cur.c==='h'){// 両手同時：右手の音→左手の音の順にボタンで答える
+    const nr=cur.parts[0].ds.length,N=cur.ds.length;
+    if(i===7&&sel.length>=nr){$('fb').textContent='左手に高いドは出ません';$('fb').style.color=tok('--muted');return}
+    sel.push(i);markSel();
+    if(sel.length<N){const nm=xs=>xs.map(x=>LABELS[x]).join('＋');
+      $('fb').textContent=sel.length<nr?`右手 ${nm(sel)}…右手あと${nr-sel.length}音`:sel.length===nr?`右手 ${nm(sel)}…次は左手`:`左手 ${nm(sel.slice(nr))}…左手あと${N-sel.length}音`;
+      $('fb').style.color=tok('--muted');return}
+    const same=(a,b)=>a.length===b.length&&a.every(x=>b.includes(x));
+    const wr=cur.parts[0].ds.map(d=>idxOf('t',d)),wl=cur.parts[1].ds.map(d=>idxOf('b',d));
+    judge(same(sel.slice(0,nr),wr)&&same(sel.slice(nr),wl),'右 '+sel.slice(0,nr).map(x=>LABELS[x]).join('＋')+'／左 '+sel.slice(nr).map(x=>LABELS[x]).join('＋'),false);return}
   if(count===1){judge(want[0]===i,LABELS[i],false);return}
   if(sel.includes(i)){sel=sel.filter(x=>x!==i);markSel();return}
   sel.push(i);markSel();
@@ -349,9 +367,10 @@ function answer(i){if(!running||!cur||pending)return;
   else{$('fb').textContent=`${LABELS[i]}…あと1音`;$('fb').style.color=tok('--muted')}}
 function answerNote(d){if(!running||!cur||pending)return;
   if(d==null){judge(false,'黒鍵',true);return}
-  if(count===1){const right=d===cur.ds[0];judge(right,LABELS[idxOf(cur.c,d)]+(right?'':'（高さちがい）'),true);return}
+  const N=cur.ds.length;
+  if(N===1){const right=d===cur.ds[0];judge(right,LABELS[idxOf(cur.c,d)]+(right?'':'（高さちがい）'),true);return}
   pressed.add(d);
-  if(pressed.size>=2){const got=[...pressed].sort((a,b)=>a-b);const right=got.length===2&&got.every(x=>cur.ds.includes(x));
+  if(pressed.size>=N){const got=[...pressed].sort((a,b)=>a-b);const right=got.length===N&&got.every(x=>cur.ds.includes(x));
     judge(right,got.map(x=>LABELS[idxOf(cur.c,x)]).join('＋')+(right?'':'（高さもふくめて確認）'),true)}}
 function judge(right,label,fromKeys){const fb=$('fb');const ans=namesOf(cur.c,cur.ds);
   if(right){ok++;streak++;if(streak>maxStreak)maxStreak=streak;if(!fromKeys)cur.ds.forEach(d=>beep(freq(d),0.4,0.22));
@@ -360,7 +379,7 @@ function judge(right,label,fromKeys){const fb=$('fb');const ans=namesOf(cur.c,cu
       const left=(endAt-performance.now())/1000;if(left>maxShown)maxShown=left;
       fb.textContent=`${streak}連続！ ＋${BONUS_SEC}秒`;fb.style.color=tok('--warn');setTimeout(()=>beep(1320,0.15,0.2),120)}
     else{fb.textContent=`正解！ ${ans}`;fb.style.color=tok('--ok')}
-    pending=setTimeout(next,count===2?320:220)}
+    pending=setTimeout(next,cur.ds.length>1?320:220)}
   else{ng++;streak=0;fb.textContent=(fromKeys?`${label}でした。`:'ちがいます。')+`正解は ${ans}`;fb.style.color=tok('--ng');
     cur.ds.forEach(d=>beep(freq(d),0.5,0.22));pending=setTimeout(next,1100)}
   hud()}
