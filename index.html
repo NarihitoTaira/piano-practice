@@ -1,0 +1,247 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style></head><body><title>譜読みドリル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@600&display=swap">
+<style>
+/* Layout: one narrow practice column — timer bar, staff like a music stand, keys below, results card after time-up */
+:root{
+  --bg:#f3f5f9; --paper:#ffffff; --ink:#1c2230; --muted:#5d6678; --line:#2a3142;
+  --accent:#2f56c9; --accent-soft:#e6ecfb; --border:#d9dee8;
+  --ok:#1f8a4c; --ng:#c23a3a; --warn:#c77a12;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  --f-display:"Zen Old Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11141b; --paper:#1a1f29; --ink:#e8ebf2; --muted:#9aa3b5; --line:#c9cfdb;
+  --accent:#7d9bff; --accent-soft:#232c45; --border:#2c3342; --ok:#4cc27e; --ng:#ff7a7a; --warn:#f0a94a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11141b; --paper:#1a1f29; --ink:#e8ebf2; --muted:#9aa3b5; --line:#c9cfdb;
+  --accent:#7d9bff; --accent-soft:#232c45; --border:#2c3342; --ok:#4cc27e; --ng:#ff7a7a; --warn:#f0a94a; color-scheme:dark}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.6;padding:0 16px}
+.wrap{max-width:480px;margin:0 auto;padding-block:20px 32px;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:600;font-size:24px;margin:0;letter-spacing:.02em}
+.sub{font-size:12px;color:var(--muted)}
+button{font-family:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--border);border-radius:10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.midi{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.midi button{font-size:13px;padding:8px 12px;font-weight:500;border-color:var(--accent);color:var(--accent)}
+#mst{font-size:12px;color:var(--muted);min-width:0;flex:1}
+#mst.on{color:var(--ok);font-weight:500}
+#mst.err{color:var(--ng)}
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.modes button{font-size:13px;padding:9px 4px}
+.modes button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
+.modes button:disabled{opacity:.5;cursor:default}
+.card{background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:12px 12px 14px;display:flex;flex-direction:column;gap:8px}
+.hud{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:end}
+.st{text-align:center}
+.st .k{font-size:11px;color:var(--muted);letter-spacing:.04em}
+.st .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+#time{font-size:28px}
+#time.low{color:var(--ng)}
+.bar{height:6px;border-radius:3px;background:var(--accent-soft);overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--accent);transform-origin:left;transition:background .2s}
+.bar i.low{background:var(--ng)}
+svg{display:block;width:100%;height:auto}
+#fb{min-height:24px;text-align:center;font-size:14px;color:var(--muted);font-weight:500}
+.keys{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.keys button{font-size:15px;padding:14px 0;line-height:1.15;min-width:0;font-weight:500}
+.keys button:active{background:var(--accent-soft)}
+.keys button:disabled{opacity:.4;cursor:default}
+.keys .hi{color:var(--accent);font-size:12px;padding:7px 0}
+.start{background:var(--accent);color:var(--paper);border-color:var(--accent);font-size:16px;font-weight:700;padding:12px;letter-spacing:.1em}
+.result h2{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0}
+.rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 6px}
+.big{grid-column:1/-1;text-align:center}
+.big .v{font-size:40px;color:var(--accent)}
+.badge{display:inline-block;font-size:12px;font-weight:700;color:var(--warn);border:1px solid var(--warn);border-radius:999px;padding:0 8px;margin-left:6px;vertical-align:middle}
+.best{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.best .bl{grid-column:1/-1;font-size:12px;color:var(--accent);font-weight:500;letter-spacing:.04em}
+.best .note{grid-column:1/-1;margin:0;font-size:11px;color:var(--muted);text-align:center}
+.foot{display:flex;justify-content:flex-end}
+#reset{font-size:13px;padding:7px 14px}
+.tips{font-size:13px;color:var(--muted);margin:0;padding-left:1.1em}
+.tips li{margin:2px 0}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>譜読みドリル</h1>
+    <span class="sub">1分間タイムアタック ／ 10連続から1問ごとに＋1秒</span>
+  </header>
+
+  <div class="midi">
+    <button id="midi">電子キーボードをつなぐ</button>
+    <span id="mst">未接続（画面のボタンでも答えられます）</span>
+  </div>
+
+  <div class="modes" role="group" aria-label="出題範囲">
+    <button id="m-r" data-m="r" aria-pressed="true">右手（ト音）</button>
+    <button id="m-l" data-m="l" aria-pressed="false">左手（ヘ音）</button>
+    <button id="m-b" data-m="b" aria-pressed="false">両方まぜる</button>
+  </div>
+
+  <div class="card">
+    <div class="hud">
+      <div class="st"><div class="k">正解</div><div class="v" id="sc">0</div></div>
+      <div class="st"><div class="k">残り時間</div><div class="v" id="time">60.0</div></div>
+      <div class="st"><div class="k">連続</div><div class="v" id="sk">0</div></div>
+    </div>
+    <div class="bar"><i id="bar"></i></div>
+    <svg id="staff" viewBox="0 0 340 150" role="img" aria-label="出題中の音符"></svg>
+    <div id="fb" aria-live="polite">スタートを押すと3秒後に始まります</div>
+    <button id="start" class="start">スタート</button>
+    <div class="keys" id="keys"></div>
+  </div>
+
+  <div class="card result" id="result" hidden>
+    <h2 id="rtitle">結果</h2>
+    <div class="rgrid">
+      <div class="st big"><div class="k">正解数</div><div class="v" id="r-ok">0</div></div>
+      <div class="st"><div class="k">ミス</div><div class="v" id="r-ng">0</div></div>
+      <div class="st"><div class="k">正解率</div><div class="v" id="r-acc">–</div></div>
+      <div class="st"><div class="k">最高連続</div><div class="v" id="r-sk">0</div></div>
+      <div class="st"><div class="k">ボーナス</div><div class="v" id="r-bonus">+0秒</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="best">
+      <span class="bl" id="bl">自己ベスト（右手）</span>
+      <div class="st"><div class="k">ハイスコア</div><div class="v" id="bs">–</div></div>
+      <div class="st"><div class="k">最高連続正解</div><div class="v" id="bk">–</div></div>
+      <div class="st"><div class="k">最高正解率</div><div class="v" id="ba">–</div></div>
+      <div class="st"><div class="k">最多ボーナス</div><div class="v" id="bb">–</div></div>
+      <p class="note">最高正解率は、10問以上答えた回だけが対象です。</p>
+    </div>
+    <div class="foot"><button id="reset">中断してやり直す</button></div>
+  </div>
+
+  <ul class="tips">
+    <li>右手の目印：下から2本目の線＝ソ、真ん中の間＝高いド</li>
+    <li>左手の目印：一番上の間＝ソ、一番上の線＝ラ</li>
+    <li>電子キーボードで答えるときは、楽譜と同じ高さの鍵盤を弾きます（真ん中のドは鍵盤の左から3つ目のド）。1オクターブずれるとミスになります</li>
+    <li>ミスをすると連続が途切れ、次の問題まで少し待たされます。当てずっぽうより、目印から数えるほうが結局速いです</li>
+  </ul>
+</div>
+
+<script>
+const LABELS=['ド','レ','ミ','ファ','ソ','ラ','シ','高いド'];
+const BTN=['ド','レ','ミ','ファ','ソ','ラ','シ','高い<br>ド'];
+const POOL={t:[28,29,30,31,32,33,34,35],b:[21,22,23,24,25,26]}; // C4..C5 / C3..A3
+const MODE_NAME={r:'右手',l:'左手',b:'両方'};
+const LIMIT=60, BONUS_EVERY=10, BONUS_SEC=1;
+let mode='r',cur=null,ok=0,ng=0,streak=0,maxStreak=0,bonus=0,ctx=null,pending=null;
+let running=false,cdTimers=[],endAt=0,raf=0,maxShown=LIMIT;
+const $=id=>document.getElementById(id);
+function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function freq(d){const semi=[0,2,4,5,7,9,11][d%7]+12*(Math.floor(d/7)+1);return 440*Math.pow(2,(semi-69)/12)}
+function beep(f,len=0.6,vol=0.3){try{if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();
+  const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.value=f;
+  g.gain.setValueAtTime(vol,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+len);
+  o.connect(g).connect(ctx.destination);o.start();o.stop(ctx.currentTime+len+0.02)}catch(e){}}
+function correctIndex(c){return (c.c==='t'&&c.d===35)?7:c.d%7}
+function draw(d,clef,big){
+  const line=tok('--line'),mut=tok('--muted'),acc=tok('--accent');
+  const bottom=clef==='t'?30:18,gap=12,yb=110;let s='';
+  for(let i=0;i<5;i++){const y=yb-i*gap;s+=`<line x1="20" y1="${y}" x2="320" y2="${y}" stroke="${line}" stroke-width="1" opacity="${d==null?0.35:1}"/>`}
+  if(d==null){
+    if(big!=null)s+=`<text x="170" y="${yb-2*gap+18}" font-size="52" font-weight="700" text-anchor="middle" fill="${acc}">${big}</text>`;
+    $('staff').innerHTML=s;return}
+  s+=`<text x="30" y="${yb-2*gap+5}" font-size="14" fill="${mut}">${clef==='t'?'ト音':'ヘ音'}</text>`;
+  const step=d-bottom,y=yb-step*gap/2,x=200;
+  if(step<=-2)for(let k=-2;k>=step;k-=2){const ly=yb-k*gap/2;s+=`<line x1="${x-16}" y1="${ly}" x2="${x+16}" y2="${ly}" stroke="${line}" stroke-width="1"/>`}
+  if(step>=10)for(let k=10;k<=step;k+=2){const ly=yb-k*gap/2;s+=`<line x1="${x-16}" y1="${ly}" x2="${x+16}" y2="${ly}" stroke="${line}" stroke-width="1"/>`}
+  s+=`<ellipse cx="${x}" cy="${y}" rx="8" ry="6" transform="rotate(-20 ${x} ${y})" fill="${acc}"/>`;
+  const up=step<4;s+=`<line x1="${up?x+7:x-7}" y1="${y}" x2="${up?x+7:x-7}" y2="${up?y-34:y+34}" stroke="${acc}" stroke-width="1.5"/>`;
+  s+=`<text x="318" y="22" font-size="12" text-anchor="end" fill="${mut}">${clef==='t'?'右手':'左手'}</text>`;
+  $('staff').innerHTML=s}
+function next(){pending=null;if(!running)return;const clef=mode==='b'?(Math.random()<.5?'t':'b'):(mode==='r'?'t':'b');const p=POOL[clef];let d;
+  do{d=p[Math.floor(Math.random()*p.length)]}while(cur&&d===cur.d&&clef===cur.c);cur={d,c:clef};draw(d,clef)}
+function setKeys(on){document.querySelectorAll('.keys button').forEach(b=>b.disabled=!on)}
+function setModes(on){document.querySelectorAll('.modes button').forEach(b=>b.disabled=!on)}
+function hud(){$('sc').textContent=ok;$('sk').textContent=streak}
+function showTime(sec){const t=Math.max(0,sec);$('time').textContent=t.toFixed(1);
+  const low=t<=10;$('time').classList.toggle('low',low);$('bar').classList.toggle('low',low);
+  $('bar').style.transform=`scaleX(${Math.min(1,t/maxShown)})`}
+function showBest(){const b=load('score-'+mode),k=load('streak-'+mode);
+  $('bl').textContent=`自己ベスト（${MODE_NAME[mode]}）`;
+  $('bs').textContent=b?b+'問':'–';$('bk').textContent=k?k+'問':'–';
+  const a=load('acc-'+mode),bo=load('bonus-'+mode);
+  $('ba').textContent=a?a+'%':'–';$('bb').textContent=bo?'+'+bo+'秒':'–'}
+function tick(){const left=(endAt-performance.now())/1000;showTime(left);if(left<=0){finish();return}raf=requestAnimationFrame(tick)}
+function idle(msg){cdTimers.forEach(clearTimeout);cdTimers=[];if(pending)clearTimeout(pending);pending=null;cancelAnimationFrame(raf);
+  running=false;cur=null;setKeys(false);setModes(true);draw(null);$('start').hidden=false;
+  maxShown=LIMIT;showTime(LIMIT);hud();
+  $('fb').textContent=msg||'スタートを押すと3秒後に始まります';$('fb').style.color=tok('--muted')}
+function start(){if(running||cdTimers.length)return;
+  ok=ng=streak=maxStreak=bonus=0;hud();$('start').hidden=true;$('result').hidden=true;setModes(false);
+  [3,2,1].forEach((n,i)=>cdTimers.push(setTimeout(()=>{draw(null,null,n);beep(660,0.2);$('fb').textContent='準備して…';$('fb').style.color=tok('--muted')},i*1000)));
+  cdTimers.push(setTimeout(()=>{cdTimers=[];running=true;setKeys(true);beep(990,0.25);
+    $('fb').textContent='スタート！';endAt=performance.now()+LIMIT*1000;maxShown=LIMIT;next();raf=requestAnimationFrame(tick)},3000))}
+let finishedAt=-1e9;
+function finish(){finishedAt=performance.now();running=false;cancelAnimationFrame(raf);if(pending)clearTimeout(pending);pending=null;cur=null;
+  setKeys(false);setModes(true);showTime(0);draw(null,null,'終了');beep(523,0.25);setTimeout(()=>beep(392,0.4),220);
+  const total=ok+ng;
+  $('r-ok').textContent=ok+'問';$('r-ng').textContent=ng+'問';
+  $('r-acc').textContent=total?Math.round(ok/total*100)+'%':'–';
+  $('r-sk').textContent=maxStreak+'問';$('r-bonus').textContent='+'+bonus+'秒';
+  const prevScore=Number(load('score-'+mode)||0),prevSk=Number(load('streak-'+mode)||0);
+  let title=`結果（${MODE_NAME[mode]}）`;
+  if(ok>prevScore){save('score-'+mode,String(ok));title+='<span class="badge">ハイスコア更新</span>'}
+  if(maxStreak>prevSk)save('streak-'+mode,String(maxStreak));
+  if(total>=10){const acc=Math.round(ok/total*100);if(acc>Number(load('acc-'+mode)||0))save('acc-'+mode,String(acc))}
+  if(bonus>Number(load('bonus-'+mode)||0))save('bonus-'+mode,String(bonus));
+  $('rtitle').innerHTML=title;$('result').hidden=false;showBest();
+  $('start').hidden=false;$('start').textContent='もう一度';
+  $('fb').textContent='時間切れ！';$('fb').style.color=tok('--accent')}
+function answer(i){if(!running||!cur||pending)return;judge(i===correctIndex(cur),LABELS[i],false)}
+function answerNote(d){if(!running||!cur||pending)return;
+  const right=d!=null&&d===cur.d;
+  judge(right,d==null?'黒鍵':LABELS[(cur.c==='t'&&d===35)?7:d%7]+(right?'':'（高さちがい）'),true)}
+function judge(right,label,fromKeys){const ci=correctIndex(cur),fb=$('fb');const i=right?ci:-1;
+  if(right){ok++;streak++;if(streak>maxStreak)maxStreak=streak;if(!fromKeys)beep(freq(cur.d),0.4);
+    if(streak>=BONUS_EVERY){endAt+=BONUS_SEC*1000;bonus+=BONUS_SEC;
+      const left=(endAt-performance.now())/1000;if(left>maxShown)maxShown=left;
+      fb.textContent=`${streak}連続！ ＋${BONUS_SEC}秒`;fb.style.color=tok('--warn');setTimeout(()=>beep(1320,0.15,0.2),120)}
+    else{fb.textContent=`正解！ ${LABELS[i]}`;fb.style.color=tok('--ok')}
+    pending=setTimeout(next,220)}
+  else{ng++;streak=0;fb.textContent=fromKeys?`${label}でした。正解は ${LABELS[ci]}`:`ちがいます。正解は ${LABELS[ci]}`;fb.style.color=tok('--ng');beep(freq(cur.d),0.5);pending=setTimeout(next,900)}
+  hud()}
+BTN.forEach((n,i)=>{const b=document.createElement('button');b.id='k'+i;b.innerHTML=n;b.setAttribute('aria-label',LABELS[i]);if(i===7)b.className='hi';b.onclick=()=>answer(i);$('keys').appendChild(b)});
+document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{if(running||cdTimers.length)return;mode=b.dataset.m;
+  document.querySelectorAll('.modes button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));
+  save('mode',mode);showBest();$('result').hidden=true;$('start').textContent='スタート';idle()});
+$('reset').onclick=()=>{$('result').hidden=true;$('start').textContent='スタート';idle('中断しました。スタートを押すと3秒後に始まります')};
+$('start').onclick=start;
+// ---- 電子キーボード（Web MIDI）----
+const WHITE={0:0,2:1,4:2,5:3,7:4,9:5,11:6};
+function midiToDiatonic(n){const pc=n%12;if(!(pc in WHITE))return null;return (Math.floor(n/12)-1)*7+WHITE[pc]}
+function onMidi(e){const [st,note,vel]=e.data;if((st&0xf0)!==0x90||vel===0)return;
+  if(running)answerNote(midiToDiatonic(note));
+  else if(!$('start').hidden&&!cdTimers.length&&performance.now()-finishedAt>1500)start()}
+function bindInputs(acc){let names=[];acc.inputs.forEach(inp=>{inp.onmidimessage=onMidi;names.push(inp.name||'MIDI機器')});
+  const st=$('mst');
+  if(names.length){st.textContent='接続中：'+names.join('、');st.className='on';$('midi').textContent='再接続';
+    $('fb').textContent=running?$('fb').textContent:'鍵盤を弾いて答えます。どこか鍵盤を押すとスタート';}
+  else{st.textContent='キーボードが見つかりません。USBケーブルをつないでからもう一度押してください';st.className='err'}}
+async function connectMidi(){const st=$('mst');
+  if(!navigator.requestMIDIAccess){st.textContent='このブラウザは電子キーボードに対応していません（Androidの Chrome で開いてください）';st.className='err';return}
+  try{const acc=await navigator.requestMIDIAccess({sysex:false});bindInputs(acc);acc.onstatechange=()=>bindInputs(acc)}
+  catch(err){const why=(err&&err.name)||'unknown';
+    const hint=why==='NotAllowedError'?'Chromeで電子キーボード（MIDI）の使用がブロックされています。アドレスバー左のアイコン→権限からMIDIを許可してください'
+      :why==='SecurityError'?'このページの開き方では電子キーボードを使えません（保存したファイルやアプリ内の画面では制限されます）'
+      :'接続できませんでした';
+    st.textContent=hint+'（'+why+'）';st.className='err'}}
+$('midi').onclick=connectMidi;
+const keyMap={'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7};
+document.addEventListener('keydown',e=>{if(e.key in keyMap)answer(keyMap[e.key]);else if((e.key===' '||e.key==='Enter')&&!running&&!$('start').hidden){e.preventDefault();start()}});
+const m=load('mode');if(m&&MODE_NAME[m]){mode=m;document.querySelectorAll('.modes button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===m?'true':'false'))}
+showBest();idle();
+</script>
+</body></html>
