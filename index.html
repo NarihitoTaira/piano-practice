@@ -30,6 +30,13 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #mst{font-size:12px;color:var(--muted);min-width:0;flex:1}
 #mst.on{color:var(--ok);font-weight:500}
 #mst.err{color:var(--ng)}
+.games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.games button{font-size:14px;font-weight:700;padding:9px 6px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.games small{font-size:11px;font-weight:400;color:var(--muted)}
+.games button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.games button[aria-pressed="true"] small{color:var(--paper);opacity:.85}
+.games button:disabled{opacity:.5;cursor:default}
+.stopbtn{font-size:14px;font-weight:500;padding:10px;border-color:var(--accent);color:var(--accent)}
 .modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .modes button{font-size:13px;padding:9px 4px}
 .modes button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
@@ -70,8 +77,13 @@ svg{display:block;width:100%;height:auto}
 <div class="wrap">
   <header>
     <h1>譜読みドリル</h1>
-    <span class="sub">1分間タイムアタック ／ 10連続から1問ごとに＋1秒</span>
+    <span class="sub" id="sub">1分間タイムアタック ／ 10連続から1問ごとに＋1秒</span>
   </header>
+
+  <div class="games" role="group" aria-label="遊び方">
+    <button id="g-ta" data-g="ta" aria-pressed="true">タイムアタック<small>1分間・ボーナスあり</small></button>
+    <button id="g-pr" data-g="pr" aria-pressed="false">練習モード<small>時間無制限</small></button>
+  </div>
 
   <div class="midi">
     <button id="midi">電子キーボードをつなぐ</button>
@@ -87,13 +99,14 @@ svg{display:block;width:100%;height:auto}
   <div class="card">
     <div class="hud">
       <div class="st"><div class="k">正解</div><div class="v" id="sc">0</div></div>
-      <div class="st"><div class="k">残り時間</div><div class="v" id="time">60.0</div></div>
+      <div class="st"><div class="k" id="tlabel">残り時間</div><div class="v" id="time">60.0</div></div>
       <div class="st"><div class="k">連続</div><div class="v" id="sk">0</div></div>
     </div>
-    <div class="bar"><i id="bar"></i></div>
+    <div class="bar" id="barwrap"><i id="bar"></i></div>
     <svg id="staff" viewBox="0 0 340 150" role="img" aria-label="出題中の音符"></svg>
     <div id="fb" aria-live="polite">スタートを押すと3秒後に始まります</div>
     <button id="start" class="start">スタート</button>
+    <button id="stop" class="stopbtn" hidden>練習を終えて結果を見る</button>
     <div class="keys" id="keys"></div>
   </div>
 
@@ -104,7 +117,7 @@ svg{display:block;width:100%;height:auto}
       <div class="st"><div class="k">ミス</div><div class="v" id="r-ng">0</div></div>
       <div class="st"><div class="k">正解率</div><div class="v" id="r-acc">–</div></div>
       <div class="st"><div class="k">最高連続</div><div class="v" id="r-sk">0</div></div>
-      <div class="st"><div class="k">ボーナス</div><div class="v" id="r-bonus">+0秒</div></div>
+      <div class="st"><div class="k" id="r-xlabel">ボーナス</div><div class="v" id="r-bonus">+0秒</div></div>
     </div>
   </div>
 
@@ -115,7 +128,7 @@ svg{display:block;width:100%;height:auto}
       <div class="st"><div class="k">最高連続正解</div><div class="v" id="bk">–</div></div>
       <div class="st"><div class="k">最高正解率</div><div class="v" id="ba">–</div></div>
       <div class="st"><div class="k">最多ボーナス</div><div class="v" id="bb">–</div></div>
-      <p class="note">最高正解率は、10問以上答えた回だけが対象です。</p>
+      <p class="note">自己ベストはタイムアタックの記録です。最高正解率は10問以上答えた回だけが対象です。</p>
     </div>
     <div class="foot"><button id="reset">中断してやり直す</button></div>
   </div>
@@ -136,6 +149,8 @@ const MODE_NAME={r:'右手',l:'左手',b:'両方'};
 const LIMIT=60, BONUS_EVERY=10, BONUS_SEC=1;
 let mode='r',cur=null,ok=0,ng=0,streak=0,maxStreak=0,bonus=0,ctx=null,pending=null;
 let running=false,cdTimers=[],endAt=0,raf=0,maxShown=LIMIT;
+let game='ta',startAt=0,qT0=0,times=[];
+const isTA=()=>game==='ta';
 const $=id=>document.getElementById(id);
 function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
 function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
@@ -162,9 +177,14 @@ function draw(d,clef,big){
   s+=`<text x="318" y="22" font-size="12" text-anchor="end" fill="${mut}">${clef==='t'?'右手':'左手'}</text>`;
   $('staff').innerHTML=s}
 function next(){pending=null;if(!running)return;const clef=mode==='b'?(Math.random()<.5?'t':'b'):(mode==='r'?'t':'b');const p=POOL[clef];let d;
-  do{d=p[Math.floor(Math.random()*p.length)]}while(cur&&d===cur.d&&clef===cur.c);cur={d,c:clef};draw(d,clef)}
+  do{d=p[Math.floor(Math.random()*p.length)]}while(cur&&d===cur.d&&clef===cur.c);cur={d,c:clef};draw(d,clef);qT0=performance.now()}
 function setKeys(on){document.querySelectorAll('.keys button').forEach(b=>b.disabled=!on)}
-function setModes(on){document.querySelectorAll('.modes button').forEach(b=>b.disabled=!on)}
+function setModes(on){document.querySelectorAll('.modes button, .games button').forEach(b=>b.disabled=!on)}
+function showElapsed(sec){$('time').textContent=fmtElapsed(sec);$('time').classList.remove('low')}
+function fmtElapsed(sec){const s=Math.max(0,sec);if(s<60)return s.toFixed(1);const m=Math.floor(s/60);return m+':'+String(Math.floor(s%60)).padStart(2,'0')}
+function applyGame(){$('tlabel').textContent=isTA()?'残り時間':'経過時間';$('barwrap').hidden=!isTA();
+  $('sub').textContent=isTA()?'1分間タイムアタック ／ 10連続から1問ごとに＋1秒':'練習モード ／ 時間無制限・好きなところで終了';
+  document.querySelectorAll('.games button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.g===game?'true':'false'))}
 function hud(){$('sc').textContent=ok;$('sk').textContent=streak}
 function showTime(sec){const t=Math.max(0,sec);$('time').textContent=t.toFixed(1);
   const low=t<=10;$('time').classList.toggle('low',low);$('bar').classList.toggle('low',low);
@@ -174,23 +194,32 @@ function showBest(){const b=load('score-'+mode),k=load('streak-'+mode);
   $('bs').textContent=b?b+'問':'–';$('bk').textContent=k?k+'問':'–';
   const a=load('acc-'+mode),bo=load('bonus-'+mode);
   $('ba').textContent=a?a+'%':'–';$('bb').textContent=bo?'+'+bo+'秒':'–'}
-function tick(){const left=(endAt-performance.now())/1000;showTime(left);if(left<=0){finish();return}raf=requestAnimationFrame(tick)}
+function tick(){if(!isTA()){showElapsed((performance.now()-startAt)/1000);raf=requestAnimationFrame(tick);return}
+  const left=(endAt-performance.now())/1000;showTime(left);if(left<=0){finish();return}raf=requestAnimationFrame(tick)}
 function idle(msg){cdTimers.forEach(clearTimeout);cdTimers=[];if(pending)clearTimeout(pending);pending=null;cancelAnimationFrame(raf);
-  running=false;cur=null;setKeys(false);setModes(true);draw(null);$('start').hidden=false;
-  maxShown=LIMIT;showTime(LIMIT);hud();
+  running=false;cur=null;setKeys(false);setModes(true);draw(null);$('start').hidden=false;$('stop').hidden=true;
+  maxShown=LIMIT;if(isTA())showTime(LIMIT);else showElapsed(0);hud();
   $('fb').textContent=msg||'スタートを押すと3秒後に始まります';$('fb').style.color=tok('--muted')}
 function start(){if(running||cdTimers.length)return;
-  ok=ng=streak=maxStreak=bonus=0;hud();$('start').hidden=true;$('result').hidden=true;setModes(false);
+  ok=ng=streak=maxStreak=bonus=0;times=[];hud();$('start').hidden=true;$('result').hidden=true;setModes(false);
   [3,2,1].forEach((n,i)=>cdTimers.push(setTimeout(()=>{draw(null,null,n);beep(660,0.2);$('fb').textContent='準備して…';$('fb').style.color=tok('--muted')},i*1000)));
   cdTimers.push(setTimeout(()=>{cdTimers=[];running=true;setKeys(true);beep(990,0.25);
-    $('fb').textContent='スタート！';endAt=performance.now()+LIMIT*1000;maxShown=LIMIT;next();raf=requestAnimationFrame(tick)},3000))}
+    $('fb').textContent='スタート！';startAt=performance.now();endAt=startAt+LIMIT*1000;maxShown=LIMIT;
+    if(!isTA())$('stop').hidden=false;next();raf=requestAnimationFrame(tick)},3000))}
 let finishedAt=-1e9;
 function finish(){finishedAt=performance.now();running=false;cancelAnimationFrame(raf);if(pending)clearTimeout(pending);pending=null;cur=null;
-  setKeys(false);setModes(true);showTime(0);draw(null,null,'終了');beep(523,0.25);setTimeout(()=>beep(392,0.4),220);
+  setKeys(false);setModes(true);$('stop').hidden=true;draw(null,null,'終了');beep(523,0.25);setTimeout(()=>beep(392,0.4),220);
   const total=ok+ng;
   $('r-ok').textContent=ok+'問';$('r-ng').textContent=ng+'問';
   $('r-acc').textContent=total?Math.round(ok/total*100)+'%':'–';
-  $('r-sk').textContent=maxStreak+'問';$('r-bonus').textContent='+'+bonus+'秒';
+  $('r-sk').textContent=maxStreak+'問';
+  if(!isTA()){const el=(finishedAt-startAt)/1000;showElapsed(el);
+    $('r-xlabel').textContent='1問の平均';
+    $('r-bonus').textContent=times.length?(times.reduce((a,b)=>a+b,0)/times.length).toFixed(1)+'秒':'–';
+    $('rtitle').innerHTML=`結果（練習・${MODE_NAME[mode]}・${fmtElapsed(el)}）`;$('result').hidden=false;
+    $('start').hidden=false;$('start').textContent='もう一度';
+    $('fb').textContent='おつかれさまでした';$('fb').style.color=tok('--accent');return}
+  showTime(0);$('r-xlabel').textContent='ボーナス';$('r-bonus').textContent='+'+bonus+'秒';
   const prevScore=Number(load('score-'+mode)||0),prevSk=Number(load('streak-'+mode)||0);
   let title=`結果（${MODE_NAME[mode]}）`;
   if(ok>prevScore){save('score-'+mode,String(ok));title+='<span class="badge">ハイスコア更新</span>'}
@@ -206,7 +235,8 @@ function answerNote(d){if(!running||!cur||pending)return;
   judge(right,d==null?'黒鍵':LABELS[(cur.c==='t'&&d===35)?7:d%7]+(right?'':'（高さちがい）'),true)}
 function judge(right,label,fromKeys){const ci=correctIndex(cur),fb=$('fb');const i=right?ci:-1;
   if(right){ok++;streak++;if(streak>maxStreak)maxStreak=streak;if(!fromKeys)beep(freq(cur.d),0.4);
-    if(streak>=BONUS_EVERY){endAt+=BONUS_SEC*1000;bonus+=BONUS_SEC;
+    times.push((performance.now()-qT0)/1000);
+    if(isTA()&&streak>=BONUS_EVERY){endAt+=BONUS_SEC*1000;bonus+=BONUS_SEC;
       const left=(endAt-performance.now())/1000;if(left>maxShown)maxShown=left;
       fb.textContent=`${streak}連続！ ＋${BONUS_SEC}秒`;fb.style.color=tok('--warn');setTimeout(()=>beep(1320,0.15,0.2),120)}
     else{fb.textContent=`正解！ ${LABELS[i]}`;fb.style.color=tok('--ok')}
@@ -219,6 +249,9 @@ document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{if(running|
   save('mode',mode);showBest();$('result').hidden=true;$('start').textContent='スタート';idle()});
 $('reset').onclick=()=>{$('result').hidden=true;$('start').textContent='スタート';idle('中断しました。スタートを押すと3秒後に始まります')};
 $('start').onclick=start;
+$('stop').onclick=()=>{if(running)finish()};
+document.querySelectorAll('.games button').forEach(b=>b.onclick=()=>{if(running||cdTimers.length)return;game=b.dataset.g;
+  save('game',game);applyGame();$('result').hidden=true;$('start').textContent='スタート';idle()});
 // ---- 電子キーボード（Web MIDI）----
 const WHITE={0:0,2:1,4:2,5:3,7:4,9:5,11:6};
 function midiToDiatonic(n){const pc=n%12;if(!(pc in WHITE))return null;return (Math.floor(n/12)-1)*7+WHITE[pc]}
@@ -242,6 +275,7 @@ $('midi').onclick=connectMidi;
 const keyMap={'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7};
 document.addEventListener('keydown',e=>{if(e.key in keyMap)answer(keyMap[e.key]);else if((e.key===' '||e.key==='Enter')&&!running&&!$('start').hidden){e.preventDefault();start()}});
 const m=load('mode');if(m&&MODE_NAME[m]){mode=m;document.querySelectorAll('.modes button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===m?'true':'false'))}
-showBest();idle();
+const g=load('game');if(g==='ta'||g==='pr')game=g;
+applyGame();showBest();idle();
 </script>
 </body></html>
