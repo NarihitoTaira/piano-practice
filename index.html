@@ -39,6 +39,28 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .kbt{font-size:12px;padding:5px 10px}
 body.midi-on:not(.show-keys) .keys{display:none}
 body.midi-on:not(.show-keys) .play svg{max-height:none}
+.hist h2{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0}
+.hhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hsub{font-size:12px;color:var(--accent);font-weight:500}
+.hk{margin:0;font-size:12px;color:var(--muted)}
+.chartwrap svg{display:block;width:100%;height:auto}
+.tablewrap{overflow-x:auto}
+.htable{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.htable th{font-size:11px;font-weight:500;color:var(--muted);text-align:right;padding:4px 6px;border-bottom:1px solid var(--border)}
+.htable td{text-align:right;padding:5px 6px;border-bottom:1px solid var(--border)}
+.htable th:first-child,.htable td:first-child{text-align:left}
+.htable tr.today td{font-weight:700}
+.empty{margin:0;font-size:13px;color:var(--muted)}
+.hnote{margin:0;font-size:12px;color:var(--muted)}
+.backup{border-top:1px solid var(--border);padding-top:8px}
+.backup summary{cursor:pointer;font-size:13px;font-weight:500;color:var(--accent)}
+.backup[open]{display:flex;flex-direction:column;gap:8px}
+.brow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.brow button{font-size:13px;padding:7px 12px}
+.danger{border-color:var(--ng);color:var(--ng)}
+.bkmsg{font-size:12px;color:var(--muted)}
+.bkmsg.ok{color:var(--ok)}.bkmsg.err{color:var(--ng)}
+#bkin{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,monospace;color:var(--ink);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px}
 .fbrow{display:flex;flex-direction:column;gap:8px}
 .stopbtn{font-size:14px;font-weight:500;padding:10px;border-color:var(--accent);color:var(--accent)}
 .counts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
@@ -82,21 +104,24 @@ svg{display:block;width:100%;height:auto}
 .tips li{margin:2px 0}
 /* 横向きのスマホ：左に楽譜とボタン、右に設定と記録 */
 @media (orientation: landscape) and (max-height: 520px){
-  .wrap{max-width:1000px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);column-gap:16px;row-gap:10px;align-items:start;padding-block:10px 16px}
-  .wrap>*{grid-column:2;order:2;min-width:0}
-  .wrap>.play{grid-column:1;grid-row:1 / span 30;order:0;position:sticky;top:calc(env(safe-area-inset-top, 0px) + 8px);padding:8px 10px 10px;gap:6px}
-  .wrap>.result{order:1}
-  .play .hud .st .v{font-size:17px}
-  .play #time{font-size:22px}
-  .play svg{width:auto;max-width:100%;height:calc(100dvh - 182px);min-height:120px;margin:0 auto}
-  .play #fb{min-height:20px;font-size:13px}
-  .play .start,.play .stopbtn{padding:8px}
-  .play .keys button{padding:10px 0}
+  /* 横向き：楽譜カードが画面いっぱい。設定やベストは下にスクロール */
+  .wrap{max-width:none;padding:6px max(10px,env(safe-area-inset-right)) 16px max(10px,env(safe-area-inset-left));gap:12px}
+  .wrap>.play{order:-1;height:calc(100dvh - 12px);box-sizing:border-box;padding:6px 10px 8px;
+    display:grid;grid-template-columns:132px minmax(0,1fr);grid-template-rows:auto auto 1fr auto auto;
+    grid-template-areas:"hud staff" "bar staff" "fb staff" "start staff" "keys keys";column-gap:10px;row-gap:6px}
+  .play .hud{grid-area:hud;grid-template-columns:1fr;gap:4px;align-self:start}
+  .play .hud .st .v{font-size:18px}
+  .play #time{font-size:26px}
+  .play .bar{grid-area:bar}
+  .play svg{grid-area:staff;width:100%;height:100%;min-height:0;max-height:none}
+  .play .fbrow{grid-area:fb;flex-direction:column;align-items:stretch;justify-content:center;gap:6px}
+  .play #fb{min-height:20px;font-size:13px;text-align:center}
+  .play .start{grid-area:start;padding:10px 6px;font-size:15px}
+  .play .stopbtn{padding:6px 8px;font-size:12px}
+  .play .keys{grid-area:keys}
+  .play .keys button{padding:9px 0}
   .play:has(#start:not([hidden])) .keys{display:none}
-  body.midi-on:not(.show-keys) .play svg{height:calc(100dvh - 128px)}
-  .fbrow{flex-direction:row;align-items:center}
-  .fbrow #fb{flex:1;min-width:0}
-  .play .stopbtn{padding:4px 10px;font-size:12px;white-space:nowrap}
+  .wrap>.result{order:0}
   h1{font-size:20px}
 }
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
@@ -169,6 +194,32 @@ svg{display:block;width:100%;height:auto}
     <div class="foot"><button id="reset">中断してやり直す</button></div>
   </div>
 
+  <div class="card hist">
+    <div class="hhead">
+      <h2>毎日の記録</h2>
+      <span class="hsub" id="hsub">右手・1音・タイムアタック</span>
+    </div>
+    <p class="hk">1問あたりの平均時間（直近14日、秒）</p>
+    <div class="chartwrap"><svg id="hchart" viewBox="0 0 320 130" role="img" aria-label="1問あたりの平均時間の推移"></svg></div>
+    <div class="tablewrap">
+      <table class="htable">
+        <thead><tr><th>日付</th><th>回数</th><th id="hbestcol">ベスト</th><th>正解率</th><th>平均</th></tr></thead>
+        <tbody id="hbody"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="hempty">まだ記録がありません。1回遊ぶと、その日の記録がここに出ます。</p>
+    <p class="hnote">記録はこのスマホのChromeの中にだけ保存され、ほかの人には見えません。上の出題範囲・音の数・遊び方を切り替えると、その組み合わせの記録に変わります。</p>
+
+    <details class="backup">
+      <summary>バックアップ</summary>
+      <p class="hnote">Chromeのデータを消すと記録も消えます。ときどき「コピー」して、メモアプリなどに貼って保存しておくと安心です。</p>
+      <div class="brow"><button id="bkcopy">記録をコピー</button><span id="bkmsg" class="bkmsg"></span></div>
+      <label for="bkin" class="hnote">戻すとき：保存しておいた文字を下に貼り付けて「読み込む」</label>
+      <textarea id="bkin" rows="3" placeholder="ここにバックアップの文字を貼り付け"></textarea>
+      <div class="brow"><button id="bkload">読み込む</button><button id="bkok" class="danger" hidden>上書きして戻す</button><button id="bkcancel" hidden>やめる</button></div>
+    </details>
+  </div>
+
   <ul class="tips">
     <li>右手の目印：下から2本目の線＝ソ、真ん中の間＝高いド</li>
     <li>左手の目印：一番上の間＝ソ、一番上の線＝ラ</li>
@@ -239,7 +290,7 @@ function setKeys(on){document.querySelectorAll('.keys button').forEach(b=>b.disa
 function setModes(on){document.querySelectorAll('.modes button, .games button, .counts button').forEach(b=>b.disabled=!on)}
 function showElapsed(sec){$('time').textContent=fmtElapsed(sec);$('time').classList.remove('low')}
 function fmtElapsed(sec){const s=Math.max(0,sec);if(s<60)return s.toFixed(1);const m=Math.floor(s/60);return m+':'+String(Math.floor(s%60)).padStart(2,'0')}
-function applyGame(){$('tlabel').textContent=isTA()?'残り時間':'経過時間';$('barwrap').hidden=!isTA();
+function applyGame(){if(typeof renderHistory==='function'&&$('hbody'))setTimeout(renderHistory);$('tlabel').textContent=isTA()?'残り時間':'経過時間';$('barwrap').hidden=!isTA();
   $('sub').textContent=isTA()?'1分間タイムアタック ／ 10連続から1問ごとに＋1秒':'練習モード ／ 時間無制限・好きなところで終了';
   document.querySelectorAll('.games button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.g===game?'true':'false'))}
 function hud(){$('sc').textContent=ok;$('sk').textContent=streak}
@@ -247,7 +298,7 @@ function showTime(sec){const t=Math.max(0,sec);$('time').textContent=t.toFixed(1
   const low=t<=10;$('time').classList.toggle('low',low);$('bar').classList.toggle('low',low);
   $('bar').style.transform=`scaleX(${Math.min(1,t/maxShown)})`}
 function bkey(){return mode+(count===2?'-2':'')}
-function showBest(){const b=load('score-'+bkey()),k=load('streak-'+bkey());
+function showBest(){if(typeof renderHistory==='function'&&$('hbody'))renderHistory();const b=load('score-'+bkey()),k=load('streak-'+bkey());
   $('bl').textContent=`自己ベスト（${MODE_NAME[mode]}${count===2?'・2音':''}）`;
   $('bs').textContent=b?b+'問':'–';$('bk').textContent=k?k+'問':'–';
   const a=load('acc-'+bkey()),bo=load('bonus-'+bkey());
@@ -259,6 +310,7 @@ function idle(msg){cdTimers.forEach(clearTimeout);cdTimers=[];if(pending)clearTi
   maxShown=LIMIT;if(isTA())showTime(LIMIT);else showElapsed(0);hud();
   $('fb').textContent=msg||'スタートを押すと3秒後に始まります';$('fb').style.color=tok('--muted')}
 function start(){if(running||cdTimers.length)return;
+  try{if(matchMedia('(orientation: landscape) and (max-height: 520px)').matches)document.querySelector('.play').scrollIntoView({block:'start'})}catch(e){}
   ok=ng=streak=maxStreak=bonus=0;times=[];hud();$('start').hidden=true;$('result').hidden=true;setModes(false);
   [3,2,1].forEach((n,i)=>cdTimers.push(setTimeout(()=>{draw(null,null,n);beep(660,0.2);$('fb').textContent='準備して…';$('fb').style.color=tok('--muted')},i*1000)));
   cdTimers.push(setTimeout(()=>{cdTimers=[];running=true;setKeys(true);beep(990,0.25);
@@ -276,7 +328,7 @@ function finish(){finishedAt=performance.now();running=false;cancelAnimationFram
     $('r-bonus').textContent=times.length?(times.reduce((a,b)=>a+b,0)/times.length).toFixed(1)+'秒':'–';
     $('rtitle').innerHTML=`結果（練習・${MODE_NAME[mode]}${count===2?'・2音':''}・${fmtElapsed(el)}）`;$('result').hidden=false;
     $('start').hidden=false;$('start').textContent='もう一度';
-    $('fb').textContent='おつかれさまでした';$('fb').style.color=tok('--accent');return}
+    $('fb').textContent='おつかれさまでした';$('fb').style.color=tok('--accent');recordHistory();return}
   showTime(0);$('r-xlabel').textContent='ボーナス';$('r-bonus').textContent='+'+bonus+'秒';
   const prevScore=Number(load('score-'+bkey())||0),prevSk=Number(load('streak-'+bkey())||0);
   let title=`結果（${MODE_NAME[mode]}${count===2?'・2音':''}）`;
@@ -286,7 +338,7 @@ function finish(){finishedAt=performance.now();running=false;cancelAnimationFram
   if(bonus>Number(load('bonus-'+bkey())||0))save('bonus-'+bkey(),String(bonus));
   $('rtitle').innerHTML=title;$('result').hidden=false;showBest();
   $('start').hidden=false;$('start').textContent='もう一度';
-  $('fb').textContent='時間切れ！';$('fb').style.color=tok('--accent')}
+  $('fb').textContent='時間切れ！';$('fb').style.color=tok('--accent');recordHistory()}
 function markSel(){document.querySelectorAll('.keys button').forEach((b,i)=>b.classList.toggle('sel',sel.includes(i)))}
 function answer(i){if(!running||!cur||pending)return;
   const want=cur.ds.map(d=>idxOf(cur.c,d));
@@ -324,6 +376,68 @@ document.querySelectorAll('.counts button').forEach(b=>b.onclick=()=>{if(running
   save('count',String(count));applyCount();showBest();$('result').hidden=true;$('start').textContent='スタート';idle()});
 document.querySelectorAll('.games button').forEach(b=>b.onclick=()=>{if(running||cdTimers.length)return;game=b.dataset.g;
   save('game',game);applyGame();$('result').hidden=true;$('start').textContent='スタート';idle()});
+
+// ---- 毎日の記録 ----
+const COUNT_NAME={1:'1音',2:'2音'},GAME_NAME={ta:'タイムアタック',pr:'練習'};
+function hkey(){return mode+'-'+count+'-'+game}
+function ymd(dt){const z=n=>String(n).padStart(2,'0');return dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate())}
+function loadHist(){try{return JSON.parse(load('hist')||'{}')||{}}catch(e){return {}}}
+function recordHistory(){const total=ok+ng;if(!total)return;
+  const h=loadHist(),day=ymd(new Date()),k=hkey();h[day]=h[day]||{};
+  const r=h[day][k]||{plays:0,best:0,ok:0,ng:0,tsum:0,tn:0};
+  r.plays++;r.ok+=ok;r.ng+=ng;r.tsum+=times.reduce((a,b)=>a+b,0);r.tn+=times.length;if(isTA()&&ok>r.best)r.best=ok;
+  h[day][k]=r;save('hist',JSON.stringify(h));renderHistory()}
+function renderHistory(){
+  $('hsub').textContent=`${MODE_NAME[mode]}・${COUNT_NAME[count]}・${GAME_NAME[game]}`;
+  $('hbestcol').textContent=isTA()?'ベスト':'問題数';
+  const h=loadHist(),k=hkey(),today=new Date(),days=[];
+  for(let i=13;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);const key=ymd(d);days.push({key,d,r:h[key]&&h[key][k]})}
+  // 表：遊んだ日だけ、新しい順
+  const rows=Object.keys(h).filter(d=>h[d][k]).sort().reverse().slice(0,30);
+  $('hempty').hidden=rows.length>0;
+  $('hbody').innerHTML=rows.map(d=>{const r=h[d][k],t=r.ok+r.ng,[y,m,dd]=d.split('-');
+    return `<tr class="${d===ymd(today)?'today':''}"><td>${Number(m)}/${Number(dd)}</td><td>${r.plays}回</td><td>${isTA()?r.best+'問':t+'問'}</td><td>${t?Math.round(r.ok/t*100)+'%':'–'}</td><td>${r.tn?(r.tsum/r.tn).toFixed(1)+'秒':'–'}</td></tr>`}).join('');
+  drawHistChart(days)}
+function drawHistChart(days){
+  const ink=tok('--ink'),mut=tok('--muted'),bd=tok('--border'),acc=tok('--accent'),paper=tok('--paper');
+  const W=320,H=130,L=30,R=12,T=14,B=22,pw=W-L-R,ph=H-T-B;
+  const vals=days.map(x=>x.r&&x.r.tn?x.r.tsum/x.r.tn:null);
+  const has=vals.filter(v=>v!=null);let s='';
+  const maxV=has.length?Math.max(1,Math.ceil(Math.max(...has)*1.15)):3;
+  const X=i=>L+pw*i/(days.length-1),Y=v=>T+ph*(1-v/maxV);
+  const ticks=[0,maxV/2,maxV];
+  ticks.forEach(t=>{s+=`<line x1="${L}" y1="${Y(t)}" x2="${W-R}" y2="${Y(t)}" stroke="${bd}" stroke-width="1"/>`;
+    s+=`<text x="${L-6}" y="${Y(t)+4}" font-size="10" text-anchor="end" fill="${mut}">${Number.isInteger(t)?t:t.toFixed(1)}</text>`});
+  [0,7,13].forEach(i=>{const d=days[i].d;s+=`<text x="${X(i)}" y="${H-6}" font-size="10" text-anchor="${i===0?'start':i===13?'end':'middle'}" fill="${mut}">${i===13?'今日':(d.getMonth()+1)+'/'+d.getDate()}</text>`});
+  // 1秒の目標線
+  if(maxV>1)s+=`<line x1="${L}" y1="${Y(1)}" x2="${W-R}" y2="${Y(1)}" stroke="${tok('--ok')}" stroke-width="1" stroke-dasharray="3 3"/><text x="${L+4}" y="${Y(1)+12}" font-size="10" text-anchor="start" fill="${mut}">目標1秒</text>`;
+  // 線（遊ばなかった日で途切れる）
+  let seg=[];const flush=()=>{if(seg.length>1)s+=`<polyline points="${seg.join(' ')}" fill="none" stroke="${acc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;seg=[]};
+  vals.forEach((v,i)=>{if(v==null)flush();else seg.push(`${X(i)},${Y(v)}`)});flush();
+  vals.forEach((v,i)=>{if(v==null)return;const last=i===vals.length-1||vals.slice(i+1).every(x=>x==null);
+    s+=`<circle cx="${X(i)}" cy="${Y(v)}" r="${last?5:4}" fill="${acc}" stroke="${paper}" stroke-width="2"><title>${days[i].d.getMonth()+1}/${days[i].d.getDate()}：${v.toFixed(1)}秒</title></circle>`;
+    if(last)s+=`<text x="${Math.min(X(i),W-R-2)}" y="${Y(v)-9}" font-size="11" font-weight="700" text-anchor="${X(i)>W-40?'end':'middle'}" fill="${ink}">${v.toFixed(1)}秒</text>`});
+  if(!has.length)s+=`<text x="${L+pw/2}" y="${T+ph/2+4}" font-size="12" text-anchor="middle" fill="${mut}">記録がたまるとグラフになります</text>`;
+  $('hchart').innerHTML=s}
+// ---- バックアップ ----
+const BK_KEYS=k=>/^(score|streak|acc|bonus)-/.test(k)||['hist','mode','game','count'].includes(k);
+function bkMsg(t,c){$('bkmsg').textContent=t;$('bkmsg').className='bkmsg '+(c||'')}
+$('bkcopy').onclick=()=>{let data={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(BK_KEYS(k))data[k]=localStorage.getItem(k)}}catch(e){}
+  const text='FUYOMI1:'+btoa(unescape(encodeURIComponent(JSON.stringify({v:1,saved:ymd(new Date()),data}))));
+  $('bkin').value=text;
+  const sel=()=>{$('bkin').focus();$('bkin').select();bkMsg('下の文字を選択しました。コピーしてメモに貼ってください','ok')};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(()=>bkMsg('コピーしました。メモアプリなどに貼って保存してください','ok'),sel);else sel()};
+let pendingRestore=null;
+$('bkload').onclick=()=>{const t=$('bkin').value.trim();pendingRestore=null;
+  try{if(!t.startsWith('FUYOMI1:'))throw 0;const o=JSON.parse(decodeURIComponent(escape(atob(t.slice(8)))));if(!o||!o.data)throw 0;
+    pendingRestore=o.data;bkMsg(`${o.saved||'日付不明'}のバックアップです。今の記録は上書きされます`);$('bkok').hidden=false;$('bkcancel').hidden=false}
+  catch(e){bkMsg('読み込めませんでした。コピーした文字を最初から最後まで貼り付けてください','err')}};
+$('bkcancel').onclick=()=>{pendingRestore=null;$('bkok').hidden=true;$('bkcancel').hidden=true;bkMsg('')};
+$('bkok').onclick=()=>{if(!pendingRestore)return;Object.entries(pendingRestore).forEach(([k,v])=>{if(BK_KEYS(k))save(k,v)});
+  pendingRestore=null;$('bkok').hidden=true;$('bkcancel').hidden=true;$('bkin').value='';bkMsg('記録を戻しました','ok');
+  const m2=load('mode');if(m2&&MODE_NAME[m2])mode=m2;const g2=load('game');if(g2==='ta'||g2==='pr')game=g2;count=load('count')==='2'?2:1;
+  document.querySelectorAll('.modes button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===mode?'true':'false'));
+  applyCount();applyGame();showBest();renderHistory();idle()};
 // ---- 電子キーボード（Web MIDI）----
 const WHITE={0:0,2:1,4:2,5:3,7:4,9:5,11:6};
 function midiToDiatonic(n){const pc=n%12;if(!(pc in WHITE))return null;return (Math.floor(n/12)-1)*7+WHITE[pc]}
