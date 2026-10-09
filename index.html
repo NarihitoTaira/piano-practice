@@ -38,6 +38,20 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .games button:disabled{opacity:.5;cursor:default}
 .kbt{font-size:12px;padding:5px 10px}
 body.midi-on:not(.show-keys) .keys{display:none}
+body.midi-on:not(.show-keys) .piano{display:none}
+body.ans-piano .keys{display:none!important}
+.piano{display:flex;flex-direction:column;gap:6px}
+.piano[hidden]{display:none}
+.pkw{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.pkw .pl{font-size:11px;color:var(--muted)}
+.piano{margin:0 -6px}
+.pk{position:relative;display:flex;height:clamp(120px,19vh,160px);user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.pk .w{flex:1;min-width:0;background:#fff;border:1px solid #9a9a9a;border-left-width:0;border-radius:0 0 6px 6px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;font-size:11px;color:#555;line-height:1.15;text-align:center;cursor:pointer;letter-spacing:-.06em;overflow:hidden;white-space:nowrap}
+.pk .w.c{color:#111;font-weight:700}
+.pk .w:first-child{border-left-width:1px}
+.pk .b{position:absolute;top:0;height:60%;background:#222;border-radius:0 0 4px 4px;z-index:1;cursor:pointer}
+.pk .w.hit{background:#cfe0ff}.pk .b.hit{background:#4a6fd1}
+.pk .w.ok{background:#d6f2dd}.pk .w.ng{background:#ffd9d9}.pk .b.ng{background:#c62828}
 body.midi-on:not(.show-keys) .play svg{max-height:none}
 .weak h2{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0}
 .wlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
@@ -71,13 +85,28 @@ body.midi-on:not(.show-keys) .play svg{max-height:none}
 #bkin{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,monospace;color:var(--ink);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px}
 .fbrow{display:flex;flex-direction:column;gap:8px}
 .stopbtn{font-size:14px;font-weight:500;padding:10px;border-color:var(--accent);color:var(--accent)}
+.inks{display:flex;align-items:center;gap:6px}
+.inkl{min-width:4em}
+.levels button{display:flex;flex-direction:column;align-items:center;line-height:1.2;padding:5px 2px}
+.levels button small{font-size:10px;color:var(--muted);font-weight:400}
+.inks button:disabled{opacity:.5;cursor:default}
+.vols{display:flex;align-items:center;gap:8px}
+.vols input{flex:1;accent-color:var(--accent)}
+.volv{font-size:12px;color:var(--muted);width:2.5em;text-align:right;font-variant-numeric:tabular-nums}
+.keys button .kn{display:block}
+.keys button small{display:block;font-size:10px;color:var(--muted);font-weight:400;margin-top:1px}
+.inkl{font-size:12px;color:var(--muted);flex:none;margin-right:2px}
+.inks button{flex:1;font-size:12px;padding:6px 4px;white-space:nowrap}
+.inks button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
+body.mono #staff{background:#fff;border-radius:10px}
 .counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.counts button{font-size:13px;padding:8px 2px;white-space:nowrap}
-.counts button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
-.counts button:disabled{opacity:.5;cursor:default}
+.looks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.counts button,.looks button{font-size:13px;padding:8px 2px;white-space:nowrap}
+.counts button[aria-pressed="true"],.looks button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
+.counts button:disabled,.looks button:disabled{opacity:.5;cursor:default}
 .keys button.sel{background:var(--accent);border-color:var(--accent);color:var(--paper)}
-.modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-.modes button{font-size:13px;padding:9px 2px;white-space:nowrap}
+.modes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.modes button{font-size:12px;padding:9px 1px;white-space:nowrap;letter-spacing:-.02em}
 .modes button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
 .modes button:disabled{opacity:.5;cursor:default}
 .card{background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:12px 12px 14px;display:flex;flex-direction:column;gap:8px}
@@ -92,11 +121,20 @@ body.midi-on:not(.show-keys) .play svg{max-height:none}
 .bar i.low{background:var(--ng)}
 svg{display:block;width:100%;height:auto}
 #fb{min-height:24px;text-align:center;font-size:14px;color:var(--muted);font-weight:500}
+.pckeys{display:none;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+@media (hover:hover) and (pointer:fine){.pckeys{display:flex}}
+body.midi-on .pckeys{display:none}
+.pckeys .row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.pckeys .lab{width:3.2em;flex:none}
+.pckeys kbd{display:inline-flex;align-items:baseline;gap:3px;font:inherit;border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 5px;background:var(--bg);color:var(--ink)}
+.pckeys kbd b{font-family:ui-monospace,monospace;font-size:12px}
+.pckeys kbd.hit{border-color:var(--accent);background:var(--accent-soft)}
+.play .pckeys{grid-column:1 / -1}
 .keys{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
 .keys button{font-size:15px;padding:14px 0;line-height:1.15;min-width:0;font-weight:500}
 .keys button:active{background:var(--accent-soft)}
 .keys button:disabled{opacity:.4;cursor:default}
-.keys .hi{color:var(--accent);font-size:12px;padding:7px 0}
+.keys .hi{color:var(--accent);font-size:11px;padding:7px 0}
 .start{background:var(--accent);color:var(--paper);border-color:var(--accent);font-size:16px;font-weight:700;padding:12px;letter-spacing:.1em}
 .result h2{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0}
 .rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 6px}
@@ -127,8 +165,16 @@ svg{display:block;width:100%;height:auto}
   .play .start{grid-area:start;padding:10px 6px;font-size:15px}
   .play .stopbtn{padding:6px 8px;font-size:12px}
   .play .keys{grid-area:keys}
+  .play .piano{grid-area:keys;flex-direction:row-reverse;gap:10px}
+  body.ans-piano .play .hud{grid-template-columns:1fr 1fr;row-gap:2px}
+  body.ans-piano .play .hud .st:nth-child(2){grid-column:1 / -1;order:-1}
+  body.ans-piano .play #time{font-size:22px}
+  body.ans-piano .play .stopbtn{font-size:11px;padding:4px 6px}
+  .play .pk{height:clamp(64px,25vh,120px)}
+  .play .piano{margin:0}
   .play .keys button{padding:9px 0}
   .play:has(#start:not([hidden])) .keys{display:none}
+  .play:has(#start:not([hidden])) .piano{display:none}
   .wrap>.result{order:0}
   h1{font-size:20px}
 }
@@ -142,8 +188,8 @@ svg{display:block;width:100%;height:auto}
   </header>
 
   <div class="games" role="group" aria-label="遊び方">
-    <button id="g-ta" data-g="ta" aria-pressed="true">タイムアタック<small>1分間・ボーナスあり</small></button>
-    <button id="g-pr" data-g="pr" aria-pressed="false">練習モード<small>時間無制限</small></button>
+    <button id="g-pr" data-g="pr" aria-pressed="true">練習モード<small>時間無制限</small></button>
+    <button id="g-ta" data-g="ta" aria-pressed="false">タイムアタック<small>1分間・ボーナスあり</small></button>
   </div>
 
   <div class="midi">
@@ -155,14 +201,58 @@ svg{display:block;width:100%;height:auto}
   <div class="modes" role="group" aria-label="出題範囲">
     <button id="m-r" data-m="r" aria-pressed="true">右手</button>
     <button id="m-l" data-m="l" aria-pressed="false">左手</button>
-    <button id="m-b" data-m="b" aria-pressed="false">両方まぜる</button>
+    <button id="m-b" data-m="b" aria-pressed="false">片手まぜる</button>
+    <button id="m-x" data-m="x" aria-pressed="false">両手まぜる</button>
     <button id="m-h" data-m="h" aria-pressed="false">両手同時</button>
   </div>
 
   <div class="counts" role="group" aria-label="音の数">
     <button id="c-1" data-n="1" aria-pressed="true">1音ずつ</button>
     <button id="c-2" data-n="2" aria-pressed="false">2音同時</button>
-    <button id="c-4" data-n="4" aria-pressed="false">先読み（4音）</button>
+    <button id="c-0" data-n="0" aria-pressed="false">ランダム</button>
+  </div>
+
+  <div class="looks" role="group" aria-label="出し方">
+    <button id="v-1" data-v="one" aria-pressed="true">1問ずつ</button>
+    <button id="v-4" data-v="seq" aria-pressed="false">先読み（4つ並ぶ）</button>
+  </div>
+
+  <div class="inks levels" role="group" aria-label="音域">
+    <span class="inkl">音域</span>
+    <button id="lv-1" data-lv="1" aria-pressed="true">Lv1<small>基本</small></button>
+    <button id="lv-2" data-lv="2" aria-pressed="false">Lv2<small>五線ぜんぶ</small></button>
+    <button id="lv-3" data-lv="3" aria-pressed="false">Lv3<small>加線2本まで</small></button>
+  </div>
+
+  <div class="inks qlims" role="group" aria-label="問題数" id="qlims">
+    <span class="inkl">問題数</span>
+    <button id="q-20" data-q="20" aria-pressed="true">20問</button>
+    <button id="q-50" data-q="50" aria-pressed="false">50問</button>
+    <button id="q-0" data-q="0" aria-pressed="false">無制限</button>
+  </div>
+
+  <div class="inks" role="group" aria-label="楽譜の色">
+    <span class="inkl">楽譜の色</span>
+    <button id="i-mono" data-i="mono" aria-pressed="true">白黒（ふつうの楽譜）</button>
+    <button id="i-color" data-i="color" aria-pressed="false">カラー</button>
+  </div>
+
+  <div class="inks anss" role="group" aria-label="答え方">
+    <span class="inkl">答え方</span>
+    <button id="a-btn" data-a="btn" aria-pressed="true">音名ボタン</button>
+    <button id="a-piano" data-a="piano" aria-pressed="false">鍵盤</button>
+  </div>
+
+  <div class="inks klabs" role="group" aria-label="鍵盤の音名" id="klabs">
+    <span class="inkl">鍵盤の音名</span>
+    <button id="kl-c" data-k="c" aria-pressed="true">ドだけ</button>
+    <button id="kl-all" data-k="all" aria-pressed="false">全部の鍵盤</button>
+  </div>
+
+  <div class="vols">
+    <label class="inkl" for="vol">音量</label>
+    <input type="range" id="vol" min="0" max="100" step="10" value="70" aria-label="音量">
+    <span id="volv" class="volv">70</span>
   </div>
 
   <div class="card play">
@@ -179,6 +269,8 @@ svg{display:block;width:100%;height:auto}
     </div>
     <button id="start" class="start">スタート</button>
     <div class="keys" id="keys"></div>
+    <div class="piano" id="piano" hidden></div>
+    <div class="pckeys" id="pckeys" aria-label="パソコンのキー割り当て"></div>
   </div>
 
   <div class="card result" id="result" hidden>
@@ -210,9 +302,9 @@ svg{display:block;width:100%;height:auto}
       <span class="hsub" id="wsub">右手</span>
     </div>
     <ol class="wlist" id="wlist"></ol>
-    <p class="empty" id="wempty">まだデータが少ないです。「1音ずつ」か「先読み」で遊ぶと、音ごとの速さとミスが集計されます。</p>
+    <p class="empty" id="wempty">まだデータが少ないです。遊ぶと、音ごとの速さとミスが集計されます。</p>
     <label class="wtoggle"><input type="checkbox" id="wfocus" checked> 苦手な音を多めに出す</label>
-    <p class="hnote">「1音ずつ」「先読み」で答えた結果を音ごとに集計しています（2音同時・両手同時は対象外）。最近の結果ほど重く見るので、克服すれば順位から消えていきます。</p>
+    <p class="hnote">すべての問題の結果を音ごとに集計しています。ミスは間違えた音だけに数え、2音以上の問題は、かかった時間をその問題の音すべてに割り当てます。最近の結果ほど重く見るので、克服すれば順位から消えていきます。</p>
     <div class="brow"><button id="wreset">苦手な音の集計をリセット</button><button id="wresetok" class="danger" hidden>リセットする</button></div>
   </div>
 
@@ -243,9 +335,14 @@ svg{display:block;width:100%;height:auto}
   </div>
 
   <ul class="tips">
-    <li>「先読み（4音）」は4つの音が並び、左から順に弾いていきます。今の音を弾きながら次の音を目で追う練習です。4つ弾き終わると次の4つに変わります</li>
+    <li>答え方を「鍵盤」にすると、画面のピアノ鍵盤をタップして答えます。電子キーボードと同じく高さまで判定し、黒鍵はミスになります。両手の問題では、右手と左手の鍵盤が並びます</li>
+    <li>音域は Lv1（基本）・Lv2（五線ぜんぶ）・Lv3（加線2本まで）から選べます。Lv2以上では、画面のボタンは音名だけで答えます（「高いド」も「ド」と同じ扱い）。パソコンでは上段 Q〜I が右手の高い音、Shift＋下段が左手の低い音です</li>
+    <li>「先読み（4つ並ぶ）」は問題が4つ並び、左から順に弾いていきます。今の音を弾きながら次の音を目で追う練習です。1音・2音、どの出題範囲とも組み合わせられます。4つ弾き終わると次の4つに変わります</li>
     <li>「苦手な音を多めに出す」がオンだと、遅い音・よく間違える音ほど出やすくなります</li>
-    <li>「両手同時」は、ト音記号（右手）とヘ音記号（左手）の音が同時に出ます。キーボードなら両手で同時に弾けばOK。画面のボタンで答えるときは、右手の音→左手の音の順に押します</li>
+    <li>パソコンでは、キーボードを鍵盤として使えます。中段の A〜K が右手のド〜高いド、下段の Z〜M が左手のド〜シです。どれかのキーを押すとスタートします。数字キーの 1〜8 で「ド〜高いド」と音名で答えることもできます</li>
+    <li>出題範囲の「片手まぜる」は右手か左手のどちらか片方、「両手まぜる」は右手だけ・左手だけ・両手同時のどれかがランダムで出ます。「両手同時」は毎回両手です</li>
+    <li>音の数の「ランダム」は、1音か2音かが毎回ランダムに出ます。両手のときは右手と左手でそれぞれ別に決まります</li>
+    <li>両手の問題では、ト音記号（右手）とヘ音記号（左手）の音が同時に出ます。キーボードなら両手で同時に弾けばOK。画面のボタンで答えるときは、右手の音→左手の音の順に押します</li>
     <li>右手の目印：下から2本目の線＝ソ、真ん中の間＝高いド</li>
     <li>左手の目印：一番上の間＝ソ、一番上の線＝ラ</li>
     <li>電子キーボードで答えるときは、楽譜と同じ高さの鍵盤を弾きます（真ん中のドは鍵盤の左から3つ目のド）。1オクターブずれるとミスになります</li>
@@ -256,38 +353,57 @@ svg{display:block;width:100%;height:auto}
 
 <script>
 const LABELS=['ド','レ','ミ','ファ','ソ','ラ','シ','高いド'];
-const BTN=['ド','レ','ミ','ファ','ソ','ラ','シ','高い<br>ド'];
-const POOL={t:[28,29,30,31,32,33,34,35],b:[21,22,23,24,25,26]}; // C4..C5 / C3..A3
-const MODE_NAME={r:'右手',l:'左手',b:'両方',h:'両手同時'};
+const SOL=['ド','レ','ミ','ファ','ソ','ラ','シ'],LET='CDEFGAB';
+const nm=d=>`${SOL[d%7]}/${LET[d%7]}${Math.floor(d/7)}`;           // ド/C4
+const btnNm=i=>i===7?'高いド/C':`${SOL[i]}/${LET[i]}`;               // ボタンは高さなし
+const BTN=SOL.map((n,i)=>`<span class="kn">${n}</span><small>${LET[i]}</small>`).concat(['<span class="kn">高いド</span><small>C</small>']);
+const rng=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+// 音域レベル：1=基本（C4〜C5／C3〜A3） 2=五線ぜんぶ（C4〜G5／G2〜C4） 3=加線2本まで（A3〜C6／C2〜E4）
+const LEVELS={1:{t:rng(28,35),b:rng(21,26),byb:180,H:214},2:{t:rng(28,39),b:rng(18,28),byb:180,H:214},3:{t:rng(26,42),b:rng(14,30),byb:204,H:250}};
+const POOL={t:LEVELS[1].t,b:LEVELS[1].b};
+let level=[1,2,3].includes(Number(load_('level')))?Number(load_('level')):1;
+let qlim=[0,20,50].includes(Number(load_('qlim')??20))?Number(load_('qlim')??20):20;
+let masterVol=(()=>{const v=Number(load_('vol')??70);return isFinite(v)?Math.max(0,Math.min(100,v)):70})();
+function load_(k){try{return localStorage.getItem(k)}catch(e){return null}}
+const MODE_NAME={r:'右手',l:'左手',b:'片手まぜる',x:'両手まぜる',h:'両手同時'};
 const LIMIT=60, BONUS_EVERY=10, BONUS_SEC=1;
 let mode='r',cur=null,ok=0,ng=0,streak=0,maxStreak=0,bonus=0,ctx=null,pending=null;
 let running=false,cdTimers=[],endAt=0,raf=0,maxShown=LIMIT;
-let game='ta',startAt=0,qT0=0,times=[],count=1,sel=[],pressed=new Set();
+let game='pr',startAt=0,qT0=0,times=[],count=1,sel=[],pressed=new Set();
 let seq=[],si=0,seqRes=[];
-const cntSfx=()=>count===2?'・2音':count===4?'・先読み':'';
+let look='one';const isSeq=()=>look==='seq';
+const cntSfx=()=>(count===2?'・2音':count===0?'・ランダム':'')+(isSeq()?'・先読み':'')+(level>1?`・Lv${level}`:'');
 const isTA=()=>game==='ta';
 const $=id=>document.getElementById(id);
 function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
 function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function freq(d){const semi=[0,2,4,5,7,9,11][d%7]+12*(Math.floor(d/7)+1);return 440*Math.pow(2,(semi-69)/12)}
-function beep(f,len=0.6,vol=0.3){try{if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();
+function beep(f,len=0.6,vol=0.3){vol*=masterVol/70;if(vol<=0.0005)return;try{if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();
   const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.value=f;
   g.gain.setValueAtTime(vol,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+len);
   o.connect(g).connect(ctx.destination);o.start();o.stop(ctx.currentTime+len+0.02)}catch(e){}}
-function idxOf(c,d){return (c!=='b'&&d===35)?7:d%7}
-function namesOf(c,ds){if(c==='h'&&cur&&cur.parts)return cur.parts.map(p=>(p.c==='t'?'右':'左')+' '+p.ds.map(d=>LABELS[idxOf(p.c,d)]).join('＋')).join('／');return ds.map(d=>LABELS[idxOf(c,d)]).join('＋')}
+function idxOf(c,d){return (level===1&&c!=='b'&&d===35)?7:d%7}
+const bi=i=>level===1?i:i%7;   // Lv2以上はボタンは音名だけで判定（高いドもド扱い）
+function namesOf(c,ds){if(c==='h'&&cur&&cur.parts)return cur.parts.map(p=>(p.c==='t'?'右':'左')+' '+p.ds.map(nm).join('＋')).join('／');return ds.map(nm).join('＋')}
 // 大譜表：上がト音記号（右手）、下がヘ音記号（左手）
 const STAFF={t:{yb:92,bottom:30,name:'ト音'},b:{yb:180,bottom:18,name:'ヘ音'}};
-function staffSvg(active,dim){const line=tok('--line'),mut=tok('--muted'),gap=12;let s='';
+// 音部記号の形（Noto Music, SIL OFL）。原点＝五線のいちばん下の線、線の間隔＝250
+const CLEF_G='M314 801Q300 854 291.0 906.0Q282 958 282 1012Q282 1059 288.5 1100.5Q295 1142 307 1177Q320 1217 341.0 1252.5Q362 1288 385.5 1311.0Q409 1334 427 1334Q451 1334 493 1249Q514 1206 524.0 1156.0Q534 1106 534 1049Q534 978 515.0 907.5Q496 837 459.5 775.0Q423 713 372 666L407 498Q422 500 432.0 501.0Q442 502 447 502Q508 502 556.0 467.5Q604 433 632.5 377.0Q661 321 661 254Q661 177 621.5 115.5Q582 54 503 25Q508 8 532 -117Q538 -147 541.0 -164.5Q544 -182 545.0 -195.0Q546 -208 546 -225Q546 -275 521.5 -314.5Q497 -354 455.5 -376.0Q414 -398 363 -398Q311 -398 271.0 -378.5Q231 -359 208.0 -324.5Q185 -290 185 -245Q185 -197 211.5 -165.0Q238 -133 287 -133Q329 -133 355.5 -163.5Q382 -194 382 -236Q382 -272 357.0 -299.0Q332 -326 292 -326H282Q308 -365 364 -365Q433 -365 472.0 -320.0Q511 -275 511 -205Q511 -188 507.0 -159.5Q503 -131 493 -91Q483 -51 477.5 -25.0Q472 1 470 12Q436 2 390 2Q304 2 222 52Q142 102 96.0 184.0Q50 266 50 361Q50 451 91 530Q132 609 192.5 675.0Q253 741 314 801ZM341 826Q364 838 390.0 870.5Q416 903 440.0 945.0Q464 987 479.0 1029.5Q494 1072 494 1106Q494 1142 483.0 1163.0Q472 1184 445 1184Q421 1184 398.5 1162.0Q376 1140 358.5 1103.5Q341 1067 331.0 1022.0Q321 977 321 930Q321 898 327.5 872.0Q334 846 341 826ZM398 379Q371 373 347.0 353.5Q323 334 308.5 306.5Q294 279 294 248Q294 223 307.0 196.5Q320 170 339 154Q352 142 365 136Q380 129 380 123Q380 120 370 117Q332 126 301.5 151.0Q271 176 253.5 211.5Q236 247 236 287Q236 330 253.5 370.0Q271 410 302.5 442.0Q334 474 374 490L345 641Q229 547 174.5 456.5Q120 366 120 277Q120 212 154.0 156.0Q188 100 247.0 65.5Q306 31 380 31Q400 31 420.5 35.0Q441 39 464 45ZM495 55Q593 97 593 227Q593 270 571.0 305.5Q549 341 512.0 362.0Q475 383 429 383Z';
+const CLEF_F='M50 123Q216 231 288 301Q336 348 373.0 408.5Q410 469 431.5 536.0Q453 603 453 669Q453 728 435.0 773.5Q417 819 383.0 845.0Q349 871 302 871Q284 871 264.5 867.0Q245 863 224 855Q181 839 158.0 813.5Q135 788 135 765Q135 756 143.0 752.0Q151 748 158 748Q168 748 183 752Q190 754 196.5 755.0Q203 756 210 756Q248 756 272.0 733.5Q296 711 296 674Q296 638 266.0 612.0Q236 586 195 586Q146 586 111.0 617.0Q76 648 76 697Q76 756 109.0 802.0Q142 848 198.5 874.0Q255 900 324 900Q400 900 460.0 867.0Q520 834 555.5 776.5Q591 719 591 646Q591 551 538 464Q511 419 476.5 379.0Q442 339 389.0 297.5Q336 256 256.0 208.0Q176 160 57 101ZM687 809Q710 809 726.0 793.0Q742 777 742 754Q742 731 726.0 715.5Q710 700 687 700Q664 700 648.0 715.5Q632 731 632 754Q632 777 648.0 793.0Q664 809 687 809ZM687 589Q710 589 726.0 573.0Q742 557 742 534Q742 511 726.0 495.5Q710 480 687 480Q664 480 648.0 495.5Q632 511 632 534Q632 557 648.0 573.0Q664 589 687 589Z';
+let viewH=214;
+let inkMode=load('ink')==='color'?'color':'mono';
+const MONO={'--line':'#1a1a1a','--muted':'#4a4a4a','--accent':'#111','--ink':'#111','--accent-soft':'#e9e9e9','--ok':'#111','--ng':'#c62828'};
+function sc(n){return inkMode==='mono'&&MONO[n]?MONO[n]:tok(n)}
+function staffSvg(active,dim){const line=sc('--line'),mut=sc('--muted'),gap=12;let s='';
   ['t','b'].forEach(k=>{const yb=STAFF[k].yb,on=active==null||active.includes(k);
-    for(let i=0;i<5;i++){const y=yb-i*gap;s+=`<line x1="24" y1="${y}" x2="320" y2="${y}" stroke="${line}" stroke-width="1" opacity="${active==null?dim:(on?1:0.45)}"/>`}
-    s+=`<text x="32" y="${yb-2*gap+5}" font-size="13" fill="${mut}" opacity="${on?1:0.55}">${STAFF[k].name}</text>`});
+    for(let i=0;i<5;i++){const y=yb-i*gap;s+=`<line x1="24" y1="${y}" x2="320" y2="${y}" stroke="${line}" stroke-width="1" opacity="${active==null?dim:(on||inkMode==='mono'?1:0.45)}"/>`}
+    s+=`<path d="${k==='t'?CLEF_G:CLEF_F}" transform="translate(29 ${yb}) scale(${gap/250} ${-gap/250})" fill="${sc('--ink')}" opacity="${active==null?dim:(on||inkMode==='mono'?1:0.55)}"><title>${k==='t'?'ト音記号':'ヘ音記号'}</title></path>`});
   // 左端のつなぎ線と波かっこ
   s+=`<line x1="24" y1="${STAFF.t.yb-4*gap}" x2="24" y2="${STAFF.b.yb}" stroke="${line}" stroke-width="1.5" opacity="${dim}"/>`;
   s+=`<path d="M18 ${STAFF.t.yb-4*gap} Q10 ${STAFF.t.yb-4*gap+30} 16 ${(STAFF.t.yb+STAFF.b.yb-4*gap)/2-6} L8 ${(STAFF.t.yb+STAFF.b.yb-4*gap)/2} L16 ${(STAFF.t.yb+STAFF.b.yb-4*gap)/2+6} Q10 ${STAFF.b.yb-30} 18 ${STAFF.b.yb}" fill="none" stroke="${line}" stroke-width="1.5" opacity="${dim}"/>`;
   return s}
-function notesSvg(parts,x,col,op=1){const line=tok('--line'),gap=12;let s=`<g opacity="${op}">`;
+function notesSvg(parts,x,col,op=1){const line=sc('--line'),gap=12;let s=`<g opacity="${op}">`;
   parts.forEach(({c:clef,ds})=>{
     const yb=STAFF[clef].yb,bottom=STAFF[clef].bottom;
     const steps=ds.map(d=>d-bottom).sort((a,b)=>a-b),lo=steps[0],hi=steps[steps.length-1];
@@ -303,9 +419,9 @@ function notesSvg(parts,x,col,op=1){const line=tok('--line'),gap=12;let s=`<g op
     s+=up?`<line x1="${sx}" y1="${Y(lo)}" x2="${sx}" y2="${Y(hi)-34}" stroke="${col}" stroke-width="1.5"/>`
          :`<line x1="${sx}" y1="${Y(hi)}" x2="${sx}" y2="${Y(lo)+34}" stroke="${col}" stroke-width="1.5"/>`});
   return s+'</g>'}
-function cornerLabel(parts){return `<text x="318" y="18" font-size="12" text-anchor="end" fill="${tok('--muted')}">${mode==='h'?'両手':mode==='b'?(count===4?'両方':parts[0].c==='t'?'右手':'左手'):parts[0].c==='t'?'右手':'左手'}${cntSfx()}</text>`}
+function cornerLabel(parts){return `<text x="318" y="18" font-size="12" text-anchor="end" fill="${sc('--muted')}">${(mode==='b'||mode==='x')&&isSeq()?'まぜる':parts.length>1?'両手':parts[0].c==='t'?'右手':'左手'}${cntSfx()}</text>`}
 function draw(ds,clef,big,parts){
-  const acc=tok('--accent'),gap=12;
+  const acc=sc('--accent'),gap=12;
   if(ds==null){let s=staffSvg(null,0.35);
     if(big!=null)s+=`<text x="172" y="${(STAFF.t.yb+STAFF.b.yb-4*gap)/2+18}" font-size="52" font-weight="700" text-anchor="middle" fill="${acc}">${big}</text>`;
     $('staff').innerHTML=s;return}
@@ -313,12 +429,12 @@ function draw(ds,clef,big,parts){
   $('staff').innerHTML=staffSvg(parts.map(p=>p.c),1)+notesSvg(parts,200,acc)+cornerLabel(parts)}
 // 先読み：4つ並べて、左から順に答える
 const SEQ_X=[106,168,230,292];
-function drawSeq(){const acc=tok('--accent'),ink=tok('--ink');
+function drawSeq(){const acc=sc('--accent'),ink=sc('--ink');
   const act=[...new Set(seq.flatMap(st=>st.parts.map(p=>p.c)))];
-  let s=`<rect x="${SEQ_X[si]-21}" y="24" width="42" height="180" rx="10" fill="${tok('--accent-soft')}"/>`+staffSvg(act,1);
-  s+=`<path d="M${SEQ_X[si]-6} 212 L${SEQ_X[si]} 205 L${SEQ_X[si]+6} 212 Z" fill="${acc}"/>`;
+  let s=`<rect x="${SEQ_X[si]-21}" y="10" width="42" height="${viewH-26}" rx="10" fill="${sc('--accent-soft')}"/>`+staffSvg(act,1);
+  s+=`<path d="M${SEQ_X[si]-6} ${viewH-3} L${SEQ_X[si]} ${viewH-10} L${SEQ_X[si]+6} ${viewH-3} Z" fill="${acc}"/>`;
   seq.forEach((st,i)=>{const r=seqRes[i];
-    const col=r==='ng'?tok('--ng'):i===si?acc:r==='ok'?tok('--ok'):ink;
+    const col=r==='ng'?sc('--ng'):i===si?acc:r==='ok'?sc('--ok'):ink;
     s+=notesSvg(st.parts,SEQ_X[i],col,r==='ok'?0.45:1)});
   $('staff').innerHTML=s+cornerLabel(seq[si].parts)}
 function pick(p){return p[Math.floor(Math.random()*p.length)]}
@@ -331,53 +447,50 @@ function weakW(c,d){if(!weakFocus)return 1;const sc=noteScore(nstat[c+d]);if(!sc
   return Math.min(5,1+Math.max(0,sc.avg-0.8)*1.2+sc.rate*6)}
 function pickW(c,p){const ws=p.map(d=>weakW(c,d)),tot=ws.reduce((a,b)=>a+b,0);let r=Math.random()*tot;
   for(let i=0;i<p.length;i++){r-=ws[i];if(r<=0)return p[i]}return p[p.length-1]}
-function recordNote(right,t){if(!cur||cur.c==='h'||cur.ds.length!==1)return;const k=cur.c+cur.ds[0];
-  const s=nstat[k]||{cnt:0,n:0,miss:0,tsum:0,tn:0};
-  s.cnt++;s.n=s.n*DECAY+1;s.miss=s.miss*DECAY+(right?0:1);
-  if(right){s.tsum=s.tsum*DECAY+Math.min(t,8);s.tn=s.tn*DECAY+1}
-  nstat[k]=s;save('nstat',JSON.stringify(nstat))}
-function noteName(k){const c=k[0],d=Number(k.slice(1));return (c==='t'?'右手':'左手')+' '+LABELS[idxOf(c,d)]}
+function recordNote(right,t,missed){if(!cur||!cur.parts)return;
+  cur.parts.forEach(p=>p.ds.forEach(d=>{const k=p.c+d;const s=nstat[k]||{cnt:0,n:0,miss:0,tsum:0,tn:0};
+    s.cnt++;s.n=s.n*DECAY+1;s.miss=s.miss*DECAY+(!right&&missed.includes(d)?1:0);
+    if(right){s.tsum=s.tsum*DECAY+Math.min(t,8);s.tn=s.tn*DECAY+1}
+    nstat[k]=s}));
+  save('nstat',JSON.stringify(nstat))}
+function noteName(k){const c=k[0],d=Number(k.slice(1));return (c==='t'?'右手':'左手')+' '+nm(d)}
 function renderWeak(){const clefs=mode==='r'?['t']:mode==='l'?['b']:['t','b'];
   $('wsub').textContent=mode==='r'?'右手（ト音）':mode==='l'?'左手（ヘ音）':'右手・左手';
   const all=Object.keys(nstat).filter(k=>clefs.includes(k[0])&&POOL[k[0]].includes(Number(k.slice(1))))
     .map(k=>({k,sc:noteScore(nstat[k])})).filter(x=>x.sc);
   const best=all.length?Math.min(...all.map(x=>x.sc.score)):0;
   const list=all.filter(x=>x.sc.score>Math.max(1.0,best*1.25)).sort((a,b)=>b.sc.score-a.sc.score).slice(0,3);
-  $('wempty').textContent=all.length?'今のところ目立って苦手な音はありません。どの音も同じくらいの速さで読めています':'まだデータが少ないです。「1音ずつ」か「先読み」で遊ぶと、音ごとの速さとミスが集計されます。';
+  $('wempty').textContent=all.length?'今のところ目立って苦手な音はありません。どの音も同じくらいの速さで読めています':'まだデータが少ないです。遊ぶと、音ごとの速さとミスが集計されます。';
   $('wempty').hidden=list.length>0;
   $('wlist').innerHTML=list.map((x,i)=>`<li><span class="wr">${i+1}</span><span class="wn">${noteName(x.k)}</span><span class="wd">平均${x.sc.avg.toFixed(1)}秒・ミス率${Math.round(x.sc.rate*100)}%</span></li>`).join('');
   $('wfocus').checked=weakFocus}
 
 function next(){pending=null;if(!running)return;sel=[];pressed=new Set();markSel();
-  const gen=(p,c)=>{for(;;){if(count!==2)return [pickW(c,p)];const a=pickW(c,p);const cands=p.filter(b=>b>a&&b-a<=4);if(cands.length)return [a,pick(cands)]}};
-  if(count===4){
+  const gen=(p,c)=>{const n=count===0?(Math.random()<.5?1:2):count;for(;;){if(n===1)return [pickW(c,p)];const a=pickW(c,p);const cands=p.filter(b=>b>a&&b-a<=4);if(cands.length)return [a,pick(cands)]}};
+  // 1問ぶん：両手同時は毎回両手。「両手まぜる」は右手だけ・左手だけ・両手同時が1/3ずつ
+  const step=()=>{if(mode==='h'||(mode==='x'&&Math.random()<1/3)){
+      const parts=[{c:'t',ds:gen(POOL.t,'t')},{c:'b',ds:gen(POOL.b,'b')}];return {ds:[...parts[0].ds,...parts[1].ds],c:'h',parts}}
+    const c=(mode==='b'||mode==='x')?(Math.random()<.5?'t':'b'):(mode==='r'?'t':'b');const ds=gen(POOL[c],c);return {ds,c,parts:[{c,ds}]}};
+  const same=(x,y)=>x&&y&&x.c===y.c&&x.ds.join()===y.ds.join();
+  if(isSeq()){
     if(!seq.length||si>=seq.length-1){seq=[];seqRes=[];si=0;
-      for(let i=0;i<SEQ_X.length;i++){let st;
-        do{if(mode==='h'){const parts=[{c:'t',ds:gen(POOL.t,'t')},{c:'b',ds:gen(POOL.b,'b')}];st={ds:[...parts[0].ds,...parts[1].ds],c:'h',parts}}
-           else{const c=mode==='b'?(Math.random()<.5?'t':'b'):(mode==='r'?'t':'b');const ds=gen(POOL[c],c);st={ds,c,parts:[{c,ds}]}}}
-        while(i>0&&seq[i-1].ds.join()===st.ds.join());
-        seq.push(st)}}
+      for(let i=0;i<SEQ_X.length;i++){let st;do{st=step()}while(i>0&&same(seq[i-1],st));seq.push(st)}}
     else si++;
     cur=seq[si];drawSeq();qT0=performance.now();return}
-  if(mode==='h'){let parts,ds;
-    do{parts=[{c:'t',ds:gen(POOL.t,'t')},{c:'b',ds:gen(POOL.b,'b')}];ds=[...parts[0].ds,...parts[1].ds]}
-    while(cur&&cur.c==='h'&&cur.ds.join()===ds.join());
-    cur={ds,c:'h',parts};draw(ds,'h',null,parts);qT0=performance.now();return}
-  const clef=mode==='b'?(Math.random()<.5?'t':'b'):(mode==='r'?'t':'b');const p=POOL[clef];let ds;
-  do{ds=gen(p,clef)}while(cur&&cur.c===clef&&cur.ds.join()===ds.join());
-  cur={ds,c:clef};draw(ds,clef);qT0=performance.now()}
+  let st;do{st=step()}while(same(cur,st));
+  cur=st;draw(st.ds,st.c,null,st.parts);qT0=performance.now()}
 function setKeys(on){document.querySelectorAll('.keys button').forEach(b=>b.disabled=!on)}
-function setModes(on){document.querySelectorAll('.modes button, .games button, .counts button').forEach(b=>b.disabled=!on)}
+function setModes(on){document.querySelectorAll('.modes button, .games button, .counts button, .looks button, .levels button, .qlims button').forEach(b=>b.disabled=!on)}
 function showElapsed(sec){$('time').textContent=fmtElapsed(sec);$('time').classList.remove('low')}
 function fmtElapsed(sec){const s=Math.max(0,sec);if(s<60)return s.toFixed(1);const m=Math.floor(s/60);return m+':'+String(Math.floor(s%60)).padStart(2,'0')}
-function applyGame(){if(typeof renderHistory==='function'&&$('hbody'))setTimeout(renderHistory);$('tlabel').textContent=isTA()?'残り時間':'経過時間';$('barwrap').hidden=!isTA();
-  $('sub').textContent=isTA()?'1分間タイムアタック ／ 10連続から1問ごとに＋1秒':'練習モード ／ 時間無制限・好きなところで終了';
+function applyGame(){if(typeof renderHistory==='function'&&$('hbody'))setTimeout(renderHistory);$('tlabel').textContent=isTA()?'残り時間':'経過時間';$('barwrap').hidden=!isTA()&&!qlim;$('qlims').hidden=isTA();
+  $('sub').textContent=isTA()?'1分間タイムアタック ／ 10連続から1問ごとに＋1秒':(qlim?`練習モード ／ ${qlim}問・時間無制限`:'練習モード ／ 時間無制限・好きなところで終了');
   document.querySelectorAll('.games button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.g===game?'true':'false'))}
-function hud(){$('sc').textContent=ok;$('sk').textContent=streak}
+function hud(){$('sc').textContent=ok;$('sk').textContent=streak;if(!isTA()&&qlim)$('bar').style.transform=`scaleX(${Math.max(0,1-(ok+ng)/qlim)})`}
 function showTime(sec){const t=Math.max(0,sec);$('time').textContent=t.toFixed(1);
   const low=t<=10;$('time').classList.toggle('low',low);$('bar').classList.toggle('low',low);
   $('bar').style.transform=`scaleX(${Math.min(1,t/maxShown)})`}
-function bkey(){return mode+(count===2?'-2':count===4?'-s':'')}
+function bkey(){return mode+(count===2?'-2':count===0?'-x':'')+(isSeq()?'-s':'')+(level>1?'-L'+level:'')}
 function showBest(){if(typeof renderHistory==='function'&&$('hbody'))renderHistory();renderWeak();const b=load('score-'+bkey()),k=load('streak-'+bkey());
   $('bl').textContent=`自己ベスト（${MODE_NAME[mode]}${cntSfx()}）`;
   $('bs').textContent=b?b+'問':'–';$('bk').textContent=k?k+'問':'–';
@@ -406,7 +519,7 @@ function finish(){finishedAt=performance.now();running=false;cancelAnimationFram
   if(!isTA()){const el=(finishedAt-startAt)/1000;showElapsed(el);
     $('r-xlabel').textContent='1問の平均';
     $('r-bonus').textContent=times.length?(times.reduce((a,b)=>a+b,0)/times.length).toFixed(1)+'秒':'–';
-    $('rtitle').innerHTML=`結果（練習・${MODE_NAME[mode]}${cntSfx()}・${fmtElapsed(el)}）`;$('result').hidden=false;
+    $('rtitle').innerHTML=`結果（練習・${MODE_NAME[mode]}${cntSfx()}・${ok+ng}問・${fmtElapsed(el)}）`;$('result').hidden=false;
     $('start').hidden=false;$('start').textContent='もう一度';
     $('fb').textContent='おつかれさまでした';$('fb').style.color=tok('--accent');recordHistory();return}
   showTime(0);$('r-xlabel').textContent='ボーナス';$('r-bonus').textContent='+'+bonus+'秒';
@@ -421,44 +534,50 @@ function finish(){finishedAt=performance.now();running=false;cancelAnimationFram
   $('fb').textContent='時間切れ！';$('fb').style.color=tok('--accent');recordHistory()}
 function markSel(){document.querySelectorAll('.keys button').forEach((b,i)=>b.classList.toggle('sel',sel.includes(i)))}
 function answer(i){if(!running||!cur||pending)return;
-  const want=cur.ds.map(d=>idxOf(cur.c,d));
+  const same=(a,b)=>a.length===b.length&&a.every(x=>b.includes(x));
+  const miss=(ds,c,got)=>ds.filter(d=>!got.includes(idxOf(c,d)));
+  const nmx=xs=>xs.map(btnNm).join('＋');
   if(cur.c==='h'){// 両手同時：右手の音→左手の音の順にボタンで答える
     const nr=cur.parts[0].ds.length,N=cur.ds.length;
-    if(i===7&&sel.length>=nr){$('fb').textContent='左手に高いドは出ません';$('fb').style.color=tok('--muted');return}
+    if(level===1&&i===7&&sel.length>=nr){$('fb').textContent='左手に高いドは出ません';$('fb').style.color=tok('--muted');return}
     sel.push(i);markSel();
-    if(sel.length<N){const nm=xs=>xs.map(x=>LABELS[x]).join('＋');
-      $('fb').textContent=sel.length<nr?`右手 ${nm(sel)}…右手あと${nr-sel.length}音`:sel.length===nr?`右手 ${nm(sel)}…次は左手`:`左手 ${nm(sel.slice(nr))}…左手あと${N-sel.length}音`;
+    if(sel.length<N){
+      $('fb').textContent=sel.length<nr?`右手 ${nmx(sel)}…右手あと${nr-sel.length}音`:sel.length===nr?`右手 ${nmx(sel)}…次は左手`:`左手 ${nmx(sel.slice(nr))}…左手あと${N-sel.length}音`;
       $('fb').style.color=tok('--muted');return}
-    const same=(a,b)=>a.length===b.length&&a.every(x=>b.includes(x));
+    const gr=sel.slice(0,nr).map(bi),gl=sel.slice(nr).map(bi);
     const wr=cur.parts[0].ds.map(d=>idxOf('t',d)),wl=cur.parts[1].ds.map(d=>idxOf('b',d));
-    judge(same(sel.slice(0,nr),wr)&&same(sel.slice(nr),wl),'右 '+sel.slice(0,nr).map(x=>LABELS[x]).join('＋')+'／左 '+sel.slice(nr).map(x=>LABELS[x]).join('＋'),false);return}
-  if(cur.ds.length===1){judge(want[0]===i,LABELS[i],false);return}
+    judge(same(gr,wr)&&same(gl,wl),'右 '+nmx(sel.slice(0,nr))+'／左 '+nmx(sel.slice(nr)),false,
+      [...miss(cur.parts[0].ds,'t',gr),...miss(cur.parts[1].ds,'b',gl)]);return}
+  const want=cur.ds.map(d=>idxOf(cur.c,d));
+  if(cur.ds.length===1){const r=want[0]===bi(i);judge(r,btnNm(i),false,r?[]:cur.ds);return}
   if(sel.includes(i)){sel=sel.filter(x=>x!==i);markSel();return}
   sel.push(i);markSel();
-  if(sel.length===2){const right=sel.every(x=>want.includes(x));judge(right,sel.map(x=>LABELS[x]).join('＋'),false)}
-  else{$('fb').textContent=`${LABELS[i]}…あと1音`;$('fb').style.color=tok('--muted')}}
+  if(sel.length===2){const g=sel.map(bi);judge(same(g,want),nmx(sel),false,miss(cur.ds,cur.c,g))}
+  else{$('fb').textContent=`${btnNm(i)}…あと1音`;$('fb').style.color=tok('--muted')}}
 function answerNote(d){if(!running||!cur||pending)return;
-  if(d==null){judge(false,'黒鍵',true);return}
+  if(d==null){judge(false,'黒鍵',true,cur.ds);return}
   const N=cur.ds.length;
-  if(N===1){const right=d===cur.ds[0];judge(right,LABELS[idxOf(cur.c,d)]+(right?'':'（高さちがい）'),true);return}
+  if(N===1){const right=d===cur.ds[0];judge(right,nm(d)+(right?'':'（高さちがい）'),true,right?[]:cur.ds);return}
   pressed.add(d);
   if(pressed.size>=N){const got=[...pressed].sort((a,b)=>a-b);const right=got.length===N&&got.every(x=>cur.ds.includes(x));
-    judge(right,got.map(x=>LABELS[idxOf(cur.c,x)]).join('＋')+(right?'':'（高さもふくめて確認）'),true)}}
-function judge(right,label,fromKeys){const fb=$('fb');const ans=namesOf(cur.c,cur.ds);
-  recordNote(right,(performance.now()-qT0)/1000);if(count===4)seqRes[si]=right?'ok':'ng';
+    judge(right,got.map(nm).join('＋')+(right?'':'（高さもふくめて確認）'),true,cur.ds.filter(x=>!got.includes(x)))}}
+function judge(right,label,fromKeys,missed=[]){const fb=$('fb');const ans=namesOf(cur.c,cur.ds);
+  recordNote(right,(performance.now()-qT0)/1000,missed);
+  const done=!isTA()&&qlim>0&&ok+ng+1>=qlim;if(isSeq())seqRes[si]=right?'ok':'ng';
   if(right){ok++;streak++;if(streak>maxStreak)maxStreak=streak;if(!fromKeys)cur.ds.forEach(d=>beep(freq(d),0.4,0.22));
     times.push((performance.now()-qT0)/1000);
     if(isTA()&&streak>=BONUS_EVERY){endAt+=BONUS_SEC*1000;bonus+=BONUS_SEC;
       const left=(endAt-performance.now())/1000;if(left>maxShown)maxShown=left;
       fb.textContent=`${streak}連続！ ＋${BONUS_SEC}秒`;fb.style.color=tok('--warn');setTimeout(()=>beep(1320,0.15,0.2),120)}
     else{fb.textContent=`正解！ ${ans}`;fb.style.color=tok('--ok')}
-    if(count===4){hud();next();return}
+    if(done){hud();if(isSeq())drawSeq();pending=setTimeout(()=>{pending=null;finish()},400);return}
+    if(isSeq()){hud();next();return}
     pending=setTimeout(next,cur.ds.length>1?320:220)}
   else{ng++;streak=0;fb.textContent=(fromKeys?`${label}でした。`:'ちがいます。')+`正解は ${ans}`;fb.style.color=tok('--ng');
-    cur.ds.forEach(d=>beep(freq(d),0.5,0.22));if(count===4)drawSeq();pending=setTimeout(next,count===4?800:1100)}
+    cur.ds.forEach(d=>beep(freq(d),0.5,0.22));if(isSeq())drawSeq();pending=setTimeout(done?()=>{pending=null;finish()}:next,isSeq()?800:1100)}
   hud()}
-BTN.forEach((n,i)=>{const b=document.createElement('button');b.id='k'+i;b.innerHTML=n;b.setAttribute('aria-label',LABELS[i]);if(i===7)b.className='hi';b.onclick=()=>answer(i);$('keys').appendChild(b)});
-document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{if(running||cdTimers.length)return;mode=b.dataset.m;
+BTN.forEach((n,i)=>{const b=document.createElement('button');b.id='k'+i;b.innerHTML=n;b.setAttribute('aria-label',btnNm(i));if(i===7)b.className='hi';b.onclick=()=>answer(i);$('keys').appendChild(b)});
+document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{if(running||cdTimers.length)return;mode=b.dataset.m;if(typeof buildPiano==='function')buildPiano();
   document.querySelectorAll('.modes button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));
   save('mode',mode);showBest();$('result').hidden=true;$('start').textContent='スタート';idle()});
 $('reset').onclick=()=>{$('result').hidden=true;$('start').textContent='スタート';idle('中断しました。スタートを押すと3秒後に始まります')};
@@ -467,12 +586,15 @@ $('stop').onclick=()=>{if(running)finish()};
 function applyCount(){document.querySelectorAll('.counts button').forEach(x=>x.setAttribute('aria-pressed',Number(x.dataset.n)===count?'true':'false'))}
 document.querySelectorAll('.counts button').forEach(b=>b.onclick=()=>{if(running||cdTimers.length)return;count=Number(b.dataset.n);
   save('count',String(count));applyCount();showBest();$('result').hidden=true;$('start').textContent='スタート';idle()});
+function applyLook(){document.querySelectorAll('.looks button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===look?'true':'false'))}
+document.querySelectorAll('.looks button').forEach(b=>b.onclick=()=>{if(running||cdTimers.length)return;look=b.dataset.v;
+  save('look',look);applyLook();showBest();$('result').hidden=true;$('start').textContent='スタート';idle()});
 document.querySelectorAll('.games button').forEach(b=>b.onclick=()=>{if(running||cdTimers.length)return;game=b.dataset.g;
   save('game',game);applyGame();$('result').hidden=true;$('start').textContent='スタート';idle()});
 
 // ---- 毎日の記録 ----
-const COUNT_NAME={1:'1音',2:'2音',4:'先読み'},GAME_NAME={ta:'タイムアタック',pr:'練習'};
-function hkey(){return mode+'-'+count+'-'+game}
+const COUNT_NAME={1:'1音',2:'2音',0:'ランダム'},GAME_NAME={ta:'タイムアタック',pr:'練習'};
+function hkey(){return mode+'-'+count+'-'+game+(isSeq()?'-s':'')+(level>1?'-L'+level:'')}
 function ymd(dt){const z=n=>String(n).padStart(2,'0');return dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate())}
 function loadHist(){try{return JSON.parse(load('hist')||'{}')||{}}catch(e){return {}}}
 function recordHistory(){const total=ok+ng;if(!total)return;
@@ -481,7 +603,7 @@ function recordHistory(){const total=ok+ng;if(!total)return;
   r.plays++;r.ok+=ok;r.ng+=ng;r.tsum+=times.reduce((a,b)=>a+b,0);r.tn+=times.length;if(isTA()&&ok>r.best)r.best=ok;
   h[day][k]=r;save('hist',JSON.stringify(h));renderHistory()}
 function renderHistory(){
-  $('hsub').textContent=`${MODE_NAME[mode]}・${COUNT_NAME[count]}・${GAME_NAME[game]}`;
+  $('hsub').textContent=`${MODE_NAME[mode]}・${COUNT_NAME[count]}${isSeq()?'・先読み':''}${level>1?'・Lv'+level:''}・${GAME_NAME[game]}`;
   $('hbestcol').textContent=isTA()?'ベスト':'問題数';
   const h=loadHist(),k=hkey(),today=new Date(),days=[];
   for(let i=13;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);const key=ymd(d);days.push({key,d,r:h[key]&&h[key][k]})}
@@ -513,7 +635,7 @@ function drawHistChart(days){
   if(!has.length)s+=`<text x="${L+pw/2}" y="${T+ph/2+4}" font-size="12" text-anchor="middle" fill="${mut}">記録がたまるとグラフになります</text>`;
   $('hchart').innerHTML=s}
 // ---- バックアップ ----
-const BK_KEYS=k=>/^(score|streak|acc|bonus)-/.test(k)||['hist','mode','game','count','nstat','wfocus'].includes(k);
+const BK_KEYS=k=>/^(score|streak|acc|bonus)-/.test(k)||['hist','mode','game','count','look','ink','nstat','wfocus','vol','qlim','level','ans','klab'].includes(k);
 function bkMsg(t,c){$('bkmsg').textContent=t;$('bkmsg').className='bkmsg '+(c||'')}
 $('bkcopy').onclick=()=>{let data={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(BK_KEYS(k))data[k]=localStorage.getItem(k)}}catch(e){}
   const text='FUYOMI1:'+btoa(unescape(encodeURIComponent(JSON.stringify({v:1,saved:ymd(new Date()),data}))));
@@ -528,7 +650,7 @@ $('bkload').onclick=()=>{const t=$('bkin').value.trim();pendingRestore=null;
 $('bkcancel').onclick=()=>{pendingRestore=null;$('bkok').hidden=true;$('bkcancel').hidden=true;bkMsg('')};
 $('bkok').onclick=()=>{if(!pendingRestore)return;Object.entries(pendingRestore).forEach(([k,v])=>{if(BK_KEYS(k))save(k,v)});
   pendingRestore=null;$('bkok').hidden=true;$('bkcancel').hidden=true;$('bkin').value='';bkMsg('記録を戻しました','ok');
-  const m2=load('mode');if(m2&&MODE_NAME[m2])mode=m2;const g2=load('game');if(g2==='ta'||g2==='pr')game=g2;count=({'2':2,'4':4})[load('count')]||1;try{nstat=JSON.parse(load('nstat')||'{}')||{}}catch(e){nstat={}}weakFocus=load('wfocus')!=='0';
+  const m2=load('mode');if(m2&&MODE_NAME[m2])mode=m2;const g2=load('game');if(g2==='ta'||g2==='pr')game=g2;count=({'2':2,'0':0})[load('count')]??1;look=load('look')==='seq'?'seq':'one';applyLook();try{nstat=JSON.parse(load('nstat')||'{}')||{}}catch(e){nstat={}}weakFocus=load('wfocus')!=='0';level=[1,2,3].includes(Number(load('level')))?Number(load('level')):1;qlim=[0,20,50].includes(Number(load('qlim')??20))?Number(load('qlim')??20):20;masterVol=Number(load('vol')??70);ansMode=load('ans')==='piano'?'piano':'btn';klab=load('klab')==='all'?'all':'c';applyLevel();applyQlim();applyVol();applyAns();inkMode=load('ink')==='color'?'color':'mono';applyInk();
   document.querySelectorAll('.modes button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===mode?'true':'false'));
   applyCount();applyGame();showBest();renderHistory();idle()};
 // ---- 電子キーボード（Web MIDI）----
@@ -551,14 +673,70 @@ async function connectMidi(){const st=$('mst');
       :'接続できませんでした';
     st.textContent=hint+'（'+why+'）';st.className='err'}}
 $('midi').onclick=connectMidi;
+// ---- 鍵盤モード（画面の鍵盤で、高さまで正しく答える）----
+let ansMode=load('ans')==='piano'?'piano':'btn';
+let klab=load('klab')==='all'?'all':'c';
+function pianoRange(c){const p=POOL[c];return [Math.min(...p),Math.max(...p)]}
+function buildPiano(){const hands=mode==='r'?['t']:mode==='l'?['b']:['t','b'];
+  $('piano').innerHTML=hands.map(c=>{const [lo,hi]=pianoRange(c),n=hi-lo+1;let w='',b='';
+    for(let d=lo;d<=hi;d++){const i=d-lo;
+      w+=`<div class="w${d%7===0?' c':''}" data-d="${d}" aria-label="${nm(d)}">${d%7===0?nm(d).replace('/','<br>'):klab==='all'?SOL[d%7]+'<br>'+LET[d%7]:''}</div>`;
+      if([0,1,3,4,5].includes(d%7)&&d<hi)b+=`<div class="b" data-black="1" style="left:calc(${(i+1)/n*100}% - ${0.33/n*100}%);width:${0.66/n*100}%"></div>`}
+    return `<div class="pkw"><span class="pl">${c==='t'?'右手':'左手'}</span><div class="pk">${w}${b}</div></div>`}).join('');
+  }
+function flashPiano(el,cls,ms){el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),ms)}
+$('piano').addEventListener('pointerdown',e=>{const k=e.target.closest('.w,.b');if(!k)return;e.preventDefault();
+  const d=k.dataset.black?null:Number(k.dataset.d);flashPiano(k,'hit',160);
+  if(running){if(d!=null)beep(freq(d),0.35,0.22);answerNote(d)}
+  else if(!$('start').hidden&&!cdTimers.length&&performance.now()-finishedAt>1500)start()});
+function applyAns(){document.body.classList.toggle('ans-piano',ansMode==='piano');$('piano').hidden=ansMode!=='piano';
+  document.querySelectorAll('.anss button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.a===ansMode?'true':'false'));
+  $('klabs').hidden=ansMode!=='piano';document.querySelectorAll('.klabs button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.k===klab?'true':'false'));buildPiano()}
+document.querySelectorAll('.klabs button').forEach(b=>b.onclick=()=>{klab=b.dataset.k;save('klab',klab);applyAns()});
+document.querySelectorAll('.anss button').forEach(b=>b.onclick=()=>{ansMode=b.dataset.a;save('ans',ansMode);applyAns()});
+function applyLevel(){const L=LEVELS[level];POOL.t=L.t;POOL.b=L.b;STAFF.b.yb=L.byb;viewH=L.H;$('staff').setAttribute('viewBox',`0 0 340 ${L.H}`);
+  document.querySelectorAll('.levels button').forEach(x=>x.setAttribute('aria-pressed',Number(x.dataset.lv)===level?'true':'false'));buildPcKeys();buildPiano()}
+document.querySelectorAll('.levels button').forEach(b=>b.onclick=()=>{if(running||cdTimers.length)return;level=Number(b.dataset.lv);save('level',String(level));
+  applyLevel();showBest();$('result').hidden=true;$('start').textContent='スタート';idle()});
+function applyQlim(){document.querySelectorAll('.qlims button').forEach(x=>x.setAttribute('aria-pressed',Number(x.dataset.q)===qlim?'true':'false'))}
+document.querySelectorAll('.qlims button').forEach(b=>b.onclick=()=>{if(running||cdTimers.length)return;qlim=Number(b.dataset.q);save('qlim',String(qlim));
+  applyQlim();applyGame();$('result').hidden=true;$('start').textContent='スタート';idle()});
+function applyVol(){$('vol').value=masterVol;$('volv').textContent=masterVol}
+$('vol').oninput=()=>{masterVol=Number($('vol').value);save('vol',String(masterVol));applyVol()};
+$('vol').onchange=()=>beep(784,0.25);
+function applyInk(){document.body.classList.toggle('mono',inkMode==='mono');
+  document.querySelectorAll('#i-mono,#i-color').forEach(x=>x.setAttribute('aria-pressed',x.dataset.i===inkMode?'true':'false'))}
+function redraw(){if(!cur)draw(null);else if(isSeq())drawSeq();else draw(cur.ds,cur.c,null,cur.parts)}
+document.querySelectorAll('#i-mono,#i-color').forEach(b=>b.onclick=()=>{inkMode=b.dataset.i;save('ink',inkMode);applyInk();redraw()});
+applyInk();
 $('wfocus').onchange=()=>{weakFocus=$('wfocus').checked;save('wfocus',weakFocus?'1':'0')};
 $('wreset').onclick=()=>{$('wresetok').hidden=!$('wresetok').hidden};
 $('wresetok').onclick=()=>{nstat={};save('nstat','{}');$('wresetok').hidden=true;renderWeak()};
 $('kbtoggle').onclick=()=>{const on=document.body.classList.toggle('show-keys');$('kbtoggle').textContent=on?'画面のボタンを隠す':'画面のボタンも出す'};
 const keyMap={'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7};
-document.addEventListener('keydown',e=>{if(e.key in keyMap)answer(keyMap[e.key]);else if((e.key===' '||e.key==='Enter')&&!running&&!$('start').hidden){e.preventDefault();start()}});
+// パソコンのキーを鍵盤として使う：中段＝右手（ド4〜ド5）、下段＝左手（ド3〜シ3）
+const PCKEYS={KeyA:28,KeyS:29,KeyD:30,KeyF:31,KeyG:32,KeyH:33,KeyJ:34,KeyK:35,KeyZ:21,KeyX:22,KeyC:23,KeyV:24,KeyB:25,KeyN:26,KeyM:27,
+  KeyQ:35,KeyW:36,KeyE:37,KeyR:38,KeyT:39,KeyY:40,KeyU:41,KeyI:42};
+const ZROW=['KeyZ','KeyX','KeyC','KeyV','KeyB','KeyN','KeyM'];
+const pcNote=e=>e.shiftKey&&ZROW.includes(e.code)?PCKEYS[e.code]-7:PCKEYS[e.code];   // Shift＋下段＝1オクターブ下
+function buildPcKeys(){const row=(lab,codes,shift)=>`<div class="row"><span class="lab">${lab}</span>`+codes.map(k=>{const d=PCKEYS[k]-(shift?7:0);
+    return `<kbd data-code="${shift?'S':''}${k}"><b>${shift?'⇧':''}${k.slice(3)}</b>${nm(d)}</kbd>`}).join('')+'</div>';
+  let h='';
+  if(level>1)h+=row('右手↑',['KeyQ','KeyW','KeyE','KeyR','KeyT','KeyY','KeyU','KeyI']);
+  h+=row('右手',['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK'])+row('左手',ZROW);
+  if(level>1)h+=row('左手↓',ZROW,true);
+  $('pckeys').innerHTML=h}
+function flashKey(code){const k=document.querySelector(`#pckeys kbd[data-code="${code}"]`);if(!k)return;k.classList.add('hit');setTimeout(()=>k.classList.remove('hit'),150)}
+document.addEventListener('keydown',e=>{
+  const tg=e.target;if(tg&&(tg.tagName==='TEXTAREA'||tg.tagName==='INPUT'))return;
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.code in PCKEYS){e.preventDefault();if(e.repeat)return;const d=pcNote(e);flashKey((e.shiftKey&&ZROW.includes(e.code)?'S':'')+e.code);
+    if(running){beep(freq(d),0.35,0.22);answerNote(d)}
+    else if(!$('start').hidden&&!cdTimers.length&&performance.now()-finishedAt>1500)start();
+    return}
+  if(e.key in keyMap)answer(keyMap[e.key]);else if((e.key===' '||e.key==='Enter')&&!running&&!$('start').hidden){e.preventDefault();start()}});
 const m=load('mode');if(m&&MODE_NAME[m]){mode=m;document.querySelectorAll('.modes button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===m?'true':'false'))}
 const g=load('game');if(g==='ta'||g==='pr')game=g;
-count=({'2':2,'4':4})[load('count')]||1;applyCount();applyGame();showBest();idle();
+count=({'2':2,'0':0})[load('count')]??1;look=load('look')==='seq'?'seq':'one';applyLook();applyCount();applyLevel();applyQlim();applyVol();applyAns();applyGame();showBest();idle();
 </script>
 </body></html>
