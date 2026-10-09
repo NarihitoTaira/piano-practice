@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style></head><body><title>譜読みドリル</title>
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>譜読みドリル</title><meta name="theme-color" content="#2f55c6"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><style>body{margin:0}[hidden]{display:none!important}</style></head><body><title>譜読みドリル</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@600&display=swap">
@@ -51,7 +51,7 @@ body.ans-piano .keys{display:none!important}
 .pk .w:first-child{border-left-width:1px}
 .pk .b{position:absolute;top:0;height:60%;background:#222;border-radius:0 0 4px 4px;z-index:1;cursor:pointer}
 .pk .w.hit{background:#cfe0ff}.pk .b.hit{background:#4a6fd1}
-.pk .w.ok{background:#d6f2dd}.pk .w.ng{background:#ffd9d9}.pk .b.ng{background:#c62828}
+.pk .w.ok{background:#8fd9a2;box-shadow:inset 0 0 0 3px #1e8a3c}.pk .w.ng{background:#ffd9d9}.pk .b.ng{background:#c62828}
 body.midi-on:not(.show-keys) .play svg{max-height:none}
 .weak h2{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0}
 .wlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
@@ -130,6 +130,23 @@ body.midi-on .pckeys{display:none}
 .pckeys kbd b{font-family:ui-monospace,monospace;font-size:12px}
 .pckeys kbd.hit{border-color:var(--accent);background:var(--accent-soft)}
 .play .pckeys{grid-column:1 / -1}
+.favs{display:flex;flex-direction:column;gap:6px}
+.favhead{display:flex;align-items:center;gap:6px}
+.favadd,.favedit{font-size:12px;padding:5px 10px}
+.favedit{margin-left:auto}
+.favlist{display:flex;flex-wrap:wrap;gap:6px}
+.favlist:empty{display:none}
+.fav{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:6px 10px;border-radius:999px;max-width:100%}
+.fav .fn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fav[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
+.fav .x{display:none;color:var(--ng);font-weight:700;padding-left:2px}
+.favs.editing .fav .x{display:inline}
+.favform{display:flex;gap:6px}
+.favform input{flex:1;min-width:0;font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--ink)}
+.favform button{font-size:12px;padding:5px 10px}
+.favok{border-color:var(--accent);color:var(--accent)}
+.fsbtn{display:none;font-size:12px;padding:6px 4px}
+.fsbtn[hidden]{display:none!important}
 .keys{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
 .keys button{font-size:15px;padding:14px 0;line-height:1.15;min-width:0;font-weight:500}
 .keys button:active{background:var(--accent-soft)}
@@ -153,8 +170,8 @@ body.midi-on .pckeys{display:none}
   /* 横向き：楽譜カードが画面いっぱい。設定やベストは下にスクロール */
   .wrap{max-width:none;padding:6px max(10px,env(safe-area-inset-right)) 16px max(10px,env(safe-area-inset-left));gap:12px}
   .wrap>.play{order:-1;height:calc(100dvh - 12px);box-sizing:border-box;padding:6px 10px 8px;
-    display:grid;grid-template-columns:132px minmax(0,1fr);grid-template-rows:auto auto 1fr auto auto;
-    grid-template-areas:"hud staff" "bar staff" "fb staff" "start staff" "keys keys";column-gap:10px;row-gap:6px}
+    display:grid;grid-template-columns:132px minmax(0,1fr);grid-template-rows:auto auto 1fr auto auto auto;
+    grid-template-areas:"hud staff" "bar staff" "fb staff" "start staff" "fs staff" "keys keys";column-gap:10px;row-gap:6px}
   .play .hud{grid-area:hud;grid-template-columns:1fr;gap:4px;align-self:start}
   .play .hud .st .v{font-size:18px}
   .play #time{font-size:26px}
@@ -165,6 +182,7 @@ body.midi-on .pckeys{display:none}
   .play .start{grid-area:start;padding:10px 6px;font-size:15px}
   .play .stopbtn{padding:6px 8px;font-size:12px}
   .play .keys{grid-area:keys}
+  .play .fsbtn{grid-area:fs;display:block}
   .play .piano{grid-area:keys;flex-direction:row-reverse;gap:10px}
   body.ans-piano .play .hud{grid-template-columns:1fr 1fr;row-gap:2px}
   body.ans-piano .play .hud .st:nth-child(2){grid-column:1 / -1;order:-1}
@@ -186,6 +204,17 @@ body.midi-on .pckeys{display:none}
     <h1>譜読みドリル</h1>
     <span class="sub" id="sub">1分間タイムアタック ／ 10連続から1問ごとに＋1秒</span>
   </header>
+
+  <div class="favs" id="favs">
+    <div class="favhead"><span class="inkl">お気に入り</span>
+      <button id="favadd" class="favadd">＋今の設定を保存</button>
+      <button id="favedit" class="favedit" hidden>編集</button></div>
+    <div class="favlist" id="favlist"></div>
+    <div class="favform" id="favform" hidden>
+      <input id="favname" maxlength="24" aria-label="お気に入りの名前">
+      <button id="favsave" class="favok">保存</button><button id="favcancel">やめる</button>
+    </div>
+  </div>
 
   <div class="games" role="group" aria-label="遊び方">
     <button id="g-pr" data-g="pr" aria-pressed="true">練習モード<small>時間無制限</small></button>
@@ -219,9 +248,10 @@ body.midi-on .pckeys{display:none}
 
   <div class="inks levels" role="group" aria-label="音域">
     <span class="inkl">音域</span>
-    <button id="lv-1" data-lv="1" aria-pressed="true">Lv1<small>基本</small></button>
-    <button id="lv-2" data-lv="2" aria-pressed="false">Lv2<small>五線ぜんぶ</small></button>
-    <button id="lv-3" data-lv="3" aria-pressed="false">Lv3<small>加線2本まで</small></button>
+    <button id="lv-1" data-lv="1" aria-pressed="true">Lv1<small>ド〜ソ</small></button>
+    <button id="lv-2" data-lv="2" aria-pressed="false">Lv2<small>1オクターブ</small></button>
+    <button id="lv-3" data-lv="3" aria-pressed="false">Lv3<small>五線ぜんぶ</small></button>
+    <button id="lv-4" data-lv="4" aria-pressed="false">Lv4<small>加線2本</small></button>
   </div>
 
   <div class="inks qlims" role="group" aria-label="問題数" id="qlims">
@@ -268,6 +298,7 @@ body.midi-on .pckeys{display:none}
       <button id="stop" class="stopbtn" hidden>練習を終えて結果を見る</button>
     </div>
     <button id="start" class="start">スタート</button>
+    <button id="fs" class="fsbtn" hidden>全画面にする</button>
     <div class="keys" id="keys"></div>
     <div class="piano" id="piano" hidden></div>
     <div class="pckeys" id="pckeys" aria-label="パソコンのキー割り当て"></div>
@@ -335,8 +366,11 @@ body.midi-on .pckeys{display:none}
   </div>
 
   <ul class="tips">
+    <li>「＋今の設定を保存」で、出題範囲・音の数・出し方・音域・遊び方・問題数・答え方の組み合わせを「お気に入り」として保存できます（8個まで）。タップで呼び出し、「編集」から削除できます</li>
+    <li>鍵盤モードでミスすると、正しい鍵盤が緑、押した鍵盤が赤で少しの間光ります</li>
+    <li>横向きのときは「全画面にする」を押すと、アドレスバーなどが消えて楽譜を大きく表示できます。戻すときは「全画面をやめる」か、スマホの戻る操作で解除できます</li>
     <li>答え方を「鍵盤」にすると、画面のピアノ鍵盤をタップして答えます。電子キーボードと同じく高さまで判定し、黒鍵はミスになります。両手の問題では、右手と左手の鍵盤が並びます</li>
-    <li>音域は Lv1（基本）・Lv2（五線ぜんぶ）・Lv3（加線2本まで）から選べます。Lv2以上では、画面のボタンは音名だけで答えます（「高いド」も「ド」と同じ扱い）。パソコンでは上段 Q〜I が右手の高い音、Shift＋下段が左手の低い音です</li>
+    <li>音域は Lv1（ド〜ソの5音）・Lv2（1オクターブ：右手ド〜高いド、左手ド〜ラ）・Lv3（五線ぜんぶ）・Lv4（加線2本まで）から選べます。Lv3以上では、画面のボタンは音名だけで答えます（「高いド」も「ド」と同じ扱い）。パソコンでは上段 Q〜I が右手の高い音、Shift＋下段が左手の低い音です</li>
     <li>「先読み（4つ並ぶ）」は問題が4つ並び、左から順に弾いていきます。今の音を弾きながら次の音を目で追う練習です。1音・2音、どの出題範囲とも組み合わせられます。4つ弾き終わると次の4つに変わります</li>
     <li>「苦手な音を多めに出す」がオンだと、遅い音・よく間違える音ほど出やすくなります</li>
     <li>パソコンでは、キーボードを鍵盤として使えます。中段の A〜K が右手のド〜高いド、下段の Z〜M が左手のド〜シです。どれかのキーを押すとスタートします。数字キーの 1〜8 で「ド〜高いド」と音名で答えることもできます</li>
@@ -358,10 +392,21 @@ const nm=d=>`${SOL[d%7]}/${LET[d%7]}${Math.floor(d/7)}`;           // ド/C4
 const btnNm=i=>i===7?'高いド/C':`${SOL[i]}/${LET[i]}`;               // ボタンは高さなし
 const BTN=SOL.map((n,i)=>`<span class="kn">${n}</span><small>${LET[i]}</small>`).concat(['<span class="kn">高いド</span><small>C</small>']);
 const rng=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
-// 音域レベル：1=基本（C4〜C5／C3〜A3） 2=五線ぜんぶ（C4〜G5／G2〜C4） 3=加線2本まで（A3〜C6／C2〜E4）
-const LEVELS={1:{t:rng(28,35),b:rng(21,26),byb:180,H:214},2:{t:rng(28,39),b:rng(18,28),byb:180,H:214},3:{t:rng(26,42),b:rng(14,30),byb:204,H:250}};
+// 音域レベル：1=ド〜ソ（C4〜G4／C3〜G3） 2=1オクターブ（C4〜C5／C3〜A3） 3=五線ぜんぶ（C4〜G5／G2〜C4） 4=加線2本まで（A3〜C6／C2〜E4）
+const LEVELS={1:{t:rng(28,32),b:rng(21,25),byb:180,H:214},2:{t:rng(28,35),b:rng(21,26),byb:180,H:214},3:{t:rng(28,39),b:rng(18,28),byb:180,H:214},4:{t:rng(26,42),b:rng(14,30),byb:204,H:250}};
+// 旧3段階→4段階への引っ越し（旧Lv1→Lv2、旧Lv2→Lv3、旧Lv3→Lv4）。記録のキーも1つずつずらす
+function migrateLevels(){try{if(localStorage.getItem('lvmig')==='1')return;
+  const shift=k=>k.endsWith('-L3')?k.slice(0,-3)+'-L4':k.endsWith('-L2')?k.slice(0,-3)+'-L3':k+'-L2';
+  const moves=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^(score|streak|acc|bonus)-/.test(k))moves.push([k,localStorage.getItem(k)])}
+  moves.forEach(([k])=>localStorage.removeItem(k));moves.forEach(([k,v])=>localStorage.setItem(shift(k),v));
+  const h=JSON.parse(localStorage.getItem('hist')||'null');
+  if(h){Object.keys(h).forEach(day=>{const o={};Object.entries(h[day]).forEach(([k,v])=>o[shift(k)]=v);h[day]=o});localStorage.setItem('hist',JSON.stringify(h))}
+  const had=localStorage.getItem('level')!=null||moves.length>0||!!h||localStorage.getItem('mode')!=null;   // 以前から使っている人だけレベルを1つ上へ
+  if(had){const lv=Number(localStorage.getItem('level')||1);localStorage.setItem('level',String(Math.min(4,(lv>=1&&lv<=3?lv:1)+1)))}
+  localStorage.setItem('lvmig','1')}catch(e){}}
+migrateLevels();
 const POOL={t:LEVELS[1].t,b:LEVELS[1].b};
-let level=[1,2,3].includes(Number(load_('level')))?Number(load_('level')):1;
+let level=[1,2,3,4].includes(Number(load_('level')))?Number(load_('level')):1;
 let qlim=[0,20,50].includes(Number(load_('qlim')??20))?Number(load_('qlim')??20):20;
 let masterVol=(()=>{const v=Number(load_('vol')??70);return isFinite(v)?Math.max(0,Math.min(100,v)):70})();
 function load_(k){try{return localStorage.getItem(k)}catch(e){return null}}
@@ -383,8 +428,8 @@ function beep(f,len=0.6,vol=0.3){vol*=masterVol/70;if(vol<=0.0005)return;try{if(
   const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.value=f;
   g.gain.setValueAtTime(vol,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+len);
   o.connect(g).connect(ctx.destination);o.start();o.stop(ctx.currentTime+len+0.02)}catch(e){}}
-function idxOf(c,d){return (level===1&&c!=='b'&&d===35)?7:d%7}
-const bi=i=>level===1?i:i%7;   // Lv2以上はボタンは音名だけで判定（高いドもド扱い）
+function idxOf(c,d){return (level<=2&&c!=='b'&&d===35)?7:d%7}
+const bi=i=>level<=2?i:i%7;   // Lv3以上はボタンは音名だけで判定（高いドもド扱い）
 function namesOf(c,ds){if(c==='h'&&cur&&cur.parts)return cur.parts.map(p=>(p.c==='t'?'右':'左')+' '+p.ds.map(nm).join('＋')).join('／');return ds.map(nm).join('＋')}
 // 大譜表：上がト音記号（右手）、下がヘ音記号（左手）
 const STAFF={t:{yb:92,bottom:30,name:'ト音'},b:{yb:180,bottom:18,name:'ヘ音'}};
@@ -465,7 +510,7 @@ function renderWeak(){const clefs=mode==='r'?['t']:mode==='l'?['b']:['t','b'];
   $('wlist').innerHTML=list.map((x,i)=>`<li><span class="wr">${i+1}</span><span class="wn">${noteName(x.k)}</span><span class="wd">平均${x.sc.avg.toFixed(1)}秒・ミス率${Math.round(x.sc.rate*100)}%</span></li>`).join('');
   $('wfocus').checked=weakFocus}
 
-function next(){pending=null;if(!running)return;sel=[];pressed=new Set();markSel();
+function next(){pending=null;if(!running)return;sel=[];pressed=new Set();markSel();if(typeof pianoPressed!=='undefined')pianoPressed=[];
   const gen=(p,c)=>{const n=count===0?(Math.random()<.5?1:2):count;for(;;){if(n===1)return [pickW(c,p)];const a=pickW(c,p);const cands=p.filter(b=>b>a&&b-a<=4);if(cands.length)return [a,pick(cands)]}};
   // 1問ぶん：両手同時は毎回両手。「両手まぜる」は右手だけ・左手だけ・両手同時が1/3ずつ
   const step=()=>{if(mode==='h'||(mode==='x'&&Math.random()<1/3)){
@@ -539,7 +584,7 @@ function answer(i){if(!running||!cur||pending)return;
   const nmx=xs=>xs.map(btnNm).join('＋');
   if(cur.c==='h'){// 両手同時：右手の音→左手の音の順にボタンで答える
     const nr=cur.parts[0].ds.length,N=cur.ds.length;
-    if(level===1&&i===7&&sel.length>=nr){$('fb').textContent='左手に高いドは出ません';$('fb').style.color=tok('--muted');return}
+    if(level<=2&&i===7&&sel.length>=nr){$('fb').textContent='左手に高いドは出ません';$('fb').style.color=tok('--muted');return}
     sel.push(i);markSel();
     if(sel.length<N){
       $('fb').textContent=sel.length<nr?`右手 ${nmx(sel)}…右手あと${nr-sel.length}音`:sel.length===nr?`右手 ${nmx(sel)}…次は左手`:`左手 ${nmx(sel.slice(nr))}…左手あと${N-sel.length}音`;
@@ -574,7 +619,7 @@ function judge(right,label,fromKeys,missed=[]){const fb=$('fb');const ans=namesO
     if(isSeq()){hud();next();return}
     pending=setTimeout(next,cur.ds.length>1?320:220)}
   else{ng++;streak=0;fb.textContent=(fromKeys?`${label}でした。`:'ちがいます。')+`正解は ${ans}`;fb.style.color=tok('--ng');
-    cur.ds.forEach(d=>beep(freq(d),0.5,0.22));if(isSeq())drawSeq();pending=setTimeout(done?()=>{pending=null;finish()}:next,isSeq()?800:1100)}
+    cur.ds.forEach(d=>beep(freq(d),0.5,0.22));showPianoAnswer(cur);if(isSeq())drawSeq();pending=setTimeout(done?()=>{pending=null;finish()}:next,isSeq()?800:1100)}
   hud()}
 BTN.forEach((n,i)=>{const b=document.createElement('button');b.id='k'+i;b.innerHTML=n;b.setAttribute('aria-label',btnNm(i));if(i===7)b.className='hi';b.onclick=()=>answer(i);$('keys').appendChild(b)});
 document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{if(running||cdTimers.length)return;mode=b.dataset.m;if(typeof buildPiano==='function')buildPiano();
@@ -635,7 +680,7 @@ function drawHistChart(days){
   if(!has.length)s+=`<text x="${L+pw/2}" y="${T+ph/2+4}" font-size="12" text-anchor="middle" fill="${mut}">記録がたまるとグラフになります</text>`;
   $('hchart').innerHTML=s}
 // ---- バックアップ ----
-const BK_KEYS=k=>/^(score|streak|acc|bonus)-/.test(k)||['hist','mode','game','count','look','ink','nstat','wfocus','vol','qlim','level','ans','klab'].includes(k);
+const BK_KEYS=k=>/^(score|streak|acc|bonus)-/.test(k)||['hist','mode','game','count','look','ink','nstat','wfocus','vol','qlim','level','ans','klab','lvmig','presets'].includes(k);
 function bkMsg(t,c){$('bkmsg').textContent=t;$('bkmsg').className='bkmsg '+(c||'')}
 $('bkcopy').onclick=()=>{let data={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(BK_KEYS(k))data[k]=localStorage.getItem(k)}}catch(e){}
   const text='FUYOMI1:'+btoa(unescape(encodeURIComponent(JSON.stringify({v:1,saved:ymd(new Date()),data}))));
@@ -648,11 +693,14 @@ $('bkload').onclick=()=>{const t=$('bkin').value.trim();pendingRestore=null;
     pendingRestore=o.data;bkMsg(`${o.saved||'日付不明'}のバックアップです。今の記録は上書きされます`);$('bkok').hidden=false;$('bkcancel').hidden=false}
   catch(e){bkMsg('読み込めませんでした。コピーした文字を最初から最後まで貼り付けてください','err')}};
 $('bkcancel').onclick=()=>{pendingRestore=null;$('bkok').hidden=true;$('bkcancel').hidden=true;bkMsg('')};
-$('bkok').onclick=()=>{if(!pendingRestore)return;Object.entries(pendingRestore).forEach(([k,v])=>{if(BK_KEYS(k))save(k,v)});
+$('bkok').onclick=()=>{if(!pendingRestore)return;
+  try{Object.keys(localStorage).filter(k=>/^(score|streak|acc|bonus)-/.test(k)).forEach(k=>localStorage.removeItem(k))}catch(e){}
+  Object.entries(pendingRestore).forEach(([k,v])=>{if(BK_KEYS(k))save(k,v)});
+  if(!('lvmig' in pendingRestore)){save('lvmig','0');migrateLevels()}
   pendingRestore=null;$('bkok').hidden=true;$('bkcancel').hidden=true;$('bkin').value='';bkMsg('記録を戻しました','ok');
-  const m2=load('mode');if(m2&&MODE_NAME[m2])mode=m2;const g2=load('game');if(g2==='ta'||g2==='pr')game=g2;count=({'2':2,'0':0})[load('count')]??1;look=load('look')==='seq'?'seq':'one';applyLook();try{nstat=JSON.parse(load('nstat')||'{}')||{}}catch(e){nstat={}}weakFocus=load('wfocus')!=='0';level=[1,2,3].includes(Number(load('level')))?Number(load('level')):1;qlim=[0,20,50].includes(Number(load('qlim')??20))?Number(load('qlim')??20):20;masterVol=Number(load('vol')??70);ansMode=load('ans')==='piano'?'piano':'btn';klab=load('klab')==='all'?'all':'c';applyLevel();applyQlim();applyVol();applyAns();inkMode=load('ink')==='color'?'color':'mono';applyInk();
+  const m2=load('mode');if(m2&&MODE_NAME[m2])mode=m2;const g2=load('game');if(g2==='ta'||g2==='pr')game=g2;count=({'2':2,'0':0})[load('count')]??1;look=load('look')==='seq'?'seq':'one';applyLook();try{nstat=JSON.parse(load('nstat')||'{}')||{}}catch(e){nstat={}}weakFocus=load('wfocus')!=='0';level=[1,2,3,4].includes(Number(load('level')))?Number(load('level')):1;qlim=[0,20,50].includes(Number(load('qlim')??20))?Number(load('qlim')??20):20;masterVol=Number(load('vol')??70);try{favs=JSON.parse(load('presets')||'[]')||[]}catch(e){favs=[]}ansMode=load('ans')==='piano'?'piano':'btn';klab=load('klab')==='all'?'all':'c';applyLevel();applyQlim();applyVol();applyAns();inkMode=load('ink')==='color'?'color':'mono';applyInk();
   document.querySelectorAll('.modes button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===mode?'true':'false'));
-  applyCount();applyGame();showBest();renderHistory();idle()};
+  applyCount();applyGame();showBest();renderHistory();idle();renderFavs()};
 // ---- 電子キーボード（Web MIDI）----
 const WHITE={0:0,2:1,4:2,5:3,7:4,9:5,11:6};
 function midiToDiatonic(n){const pc=n%12;if(!(pc in WHITE))return null;return (Math.floor(n/12)-1)*7+WHITE[pc]}
@@ -673,6 +721,41 @@ async function connectMidi(){const st=$('mst');
       :'接続できませんでした';
     st.textContent=hint+'（'+why+'）';st.className='err'}}
 $('midi').onclick=connectMidi;
+// ---- お気に入り（設定の組み合わせを保存）----
+const FAV_KEYS=['game','mode','count','look','level','qlim','ans'];
+let favs=[];try{favs=JSON.parse(load('presets')||'[]')||[]}catch(e){favs=[]}
+const curSettings=()=>({game,mode,count,look,level,qlim,ans:ansMode});
+const sameSet=(a,b)=>FAV_KEYS.every(k=>a[k]===b[k]||(k==='qlim'&&a.game==='ta'&&b.game==='ta'));
+function favLabel(o){return [`Lv${o.level}`,MODE_NAME[o.mode],{1:'1音',2:'2音',0:'ランダム'}[o.count],o.look==='seq'?'先読み':null,o.ans==='piano'?'鍵盤':null,o.game==='ta'?'TA':null].filter(Boolean).join('・')}
+function renderFavs(){const c=curSettings();
+  $('favlist').innerHTML=favs.map((f,i)=>`<button class="fav" data-i="${i}" aria-pressed="${sameSet(f.s,c)}" title="${favLabel(f.s)}"><span class="fn">${f.name.replace(/[&<>"]/g,'')}</span><span class="x" aria-label="削除">×</span></button>`).join('');
+  $('favedit').hidden=!favs.length;if(!favs.length)$('favs').classList.remove('editing');
+  $('favedit').textContent=$('favs').classList.contains('editing')?'完了':'編集';$('favadd').disabled=favs.length>=8}
+function saveFavs(){save('presets',JSON.stringify(favs));renderFavs()}
+function applySettings(o){if(running||cdTimers.length)return;
+  game=o.game==='ta'?'ta':'pr';mode=MODE_NAME[o.mode]?o.mode:'r';count=[0,1,2].includes(o.count)?o.count:1;look=o.look==='seq'?'seq':'one';
+  level=[1,2,3,4].includes(o.level)?o.level:1;qlim=[0,20,50].includes(o.qlim)?o.qlim:20;ansMode=o.ans==='piano'?'piano':'btn';
+  save('game',game);save('mode',mode);save('count',String(count));save('look',look);save('level',String(level));save('qlim',String(qlim));save('ans',ansMode);
+  document.querySelectorAll('.modes button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===mode?'true':'false'));
+  applyCount();applyLook();applyLevel();applyQlim();applyAns();applyGame();showBest();$('result').hidden=true;$('start').textContent='スタート';idle();renderFavs()}
+$('favlist').onclick=e=>{const b=e.target.closest('.fav');if(!b)return;const i=Number(b.dataset.i);
+  if($('favs').classList.contains('editing')){favs.splice(i,1);saveFavs();return}
+  applySettings(favs[i].s)};
+$('favadd').onclick=()=>{$('favform').hidden=false;$('favname').value=favLabel(curSettings());$('favname').focus();$('favname').select()};
+$('favcancel').onclick=()=>{$('favform').hidden=true};
+$('favsave').onclick=()=>{const name=$('favname').value.trim()||favLabel(curSettings());favs.push({name,s:curSettings()});$('favform').hidden=true;saveFavs()};
+$('favname').onkeydown=e=>{if(e.key==='Enter')$('favsave').click();else if(e.key==='Escape')$('favcancel').click()};
+$('favedit').onclick=()=>{$('favs').classList.toggle('editing');renderFavs()};
+// 設定ボタンを押したら、お気に入りの選択表示を更新
+document.addEventListener('click',e=>{if(e.target.closest('.modes,.games,.counts,.looks,.levels,.qlims,.anss'))setTimeout(renderFavs)});
+// ---- ホーム画面に追加（PWA）：GitHub Pages など https で開いたときだけ ----
+try{if('serviceWorker' in navigator&&location.protocol==='https:'&&document.querySelector('link[rel="manifest"]'))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+// ---- 全画面（横向きでURLバーを消す）----
+const fsOK=!!(document.fullscreenEnabled&&document.documentElement.requestFullscreen);
+function applyFs(){$('fs').hidden=!fsOK;$('fs').textContent=document.fullscreenElement?'全画面をやめる':'全画面にする'}
+$('fs').onclick=()=>{try{if(document.fullscreenElement)document.exitFullscreen();
+  else document.documentElement.requestFullscreen({navigationUI:'hide'}).then(()=>{try{document.querySelector('.play').scrollIntoView({block:'start'})}catch(e){}}).catch(()=>{})}catch(e){}};
+document.addEventListener('fullscreenchange',applyFs);applyFs();
 // ---- 鍵盤モード（画面の鍵盤で、高さまで正しく答える）----
 let ansMode=load('ans')==='piano'?'piano':'btn';
 let klab=load('klab')==='all'?'all':'c';
@@ -682,12 +765,18 @@ function buildPiano(){const hands=mode==='r'?['t']:mode==='l'?['b']:['t','b'];
     for(let d=lo;d<=hi;d++){const i=d-lo;
       w+=`<div class="w${d%7===0?' c':''}" data-d="${d}" aria-label="${nm(d)}">${d%7===0?nm(d).replace('/','<br>'):klab==='all'?SOL[d%7]+'<br>'+LET[d%7]:''}</div>`;
       if([0,1,3,4,5].includes(d%7)&&d<hi)b+=`<div class="b" data-black="1" style="left:calc(${(i+1)/n*100}% - ${0.33/n*100}%);width:${0.66/n*100}%"></div>`}
-    return `<div class="pkw"><span class="pl">${c==='t'?'右手':'左手'}</span><div class="pk">${w}${b}</div></div>`}).join('');
+    return `<div class="pkw"><span class="pl">${c==='t'?'右手':'左手'}</span><div class="pk" data-c="${c}">${w}${b}</div></div>`}).join('');
   }
+let pianoPressed=[];
+// ミスしたとき：正しい鍵盤を緑、押した間違いの鍵盤を赤で少しの間見せる
+function showPianoAnswer(q){if(ansMode!=='piano'||$('piano').hidden||!q)return;const ms=isSeq()?750:1050;
+  const want=new Set();q.parts.forEach(p=>p.ds.forEach(d=>{const el=document.querySelector(`#piano .pk[data-c="${p.c}"] .w[data-d="${d}"]`)||document.querySelector(`#piano .w[data-d="${d}"]`);
+    if(el){want.add(el);flashPiano(el,'ok',ms)}}));
+  pianoPressed.forEach(el=>{if(!want.has(el))flashPiano(el,'ng',ms)});pianoPressed=[]}
 function flashPiano(el,cls,ms){el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),ms)}
 $('piano').addEventListener('pointerdown',e=>{const k=e.target.closest('.w,.b');if(!k)return;e.preventDefault();
   const d=k.dataset.black?null:Number(k.dataset.d);flashPiano(k,'hit',160);
-  if(running){if(d!=null)beep(freq(d),0.35,0.22);answerNote(d)}
+  if(running){if(d!=null)beep(freq(d),0.35,0.22);if(cur&&!pending)pianoPressed.push(k);answerNote(d)}
   else if(!$('start').hidden&&!cdTimers.length&&performance.now()-finishedAt>1500)start()});
 function applyAns(){document.body.classList.toggle('ans-piano',ansMode==='piano');$('piano').hidden=ansMode!=='piano';
   document.querySelectorAll('.anss button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.a===ansMode?'true':'false'));
@@ -722,9 +811,9 @@ const pcNote=e=>e.shiftKey&&ZROW.includes(e.code)?PCKEYS[e.code]-7:PCKEYS[e.code
 function buildPcKeys(){const row=(lab,codes,shift)=>`<div class="row"><span class="lab">${lab}</span>`+codes.map(k=>{const d=PCKEYS[k]-(shift?7:0);
     return `<kbd data-code="${shift?'S':''}${k}"><b>${shift?'⇧':''}${k.slice(3)}</b>${nm(d)}</kbd>`}).join('')+'</div>';
   let h='';
-  if(level>1)h+=row('右手↑',['KeyQ','KeyW','KeyE','KeyR','KeyT','KeyY','KeyU','KeyI']);
+  if(level>2)h+=row('右手↑',['KeyQ','KeyW','KeyE','KeyR','KeyT','KeyY','KeyU','KeyI']);
   h+=row('右手',['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK'])+row('左手',ZROW);
-  if(level>1)h+=row('左手↓',ZROW,true);
+  if(level>2)h+=row('左手↓',ZROW,true);
   $('pckeys').innerHTML=h}
 function flashKey(code){const k=document.querySelector(`#pckeys kbd[data-code="${code}"]`);if(!k)return;k.classList.add('hit');setTimeout(()=>k.classList.remove('hit'),150)}
 document.addEventListener('keydown',e=>{
@@ -737,6 +826,6 @@ document.addEventListener('keydown',e=>{
   if(e.key in keyMap)answer(keyMap[e.key]);else if((e.key===' '||e.key==='Enter')&&!running&&!$('start').hidden){e.preventDefault();start()}});
 const m=load('mode');if(m&&MODE_NAME[m]){mode=m;document.querySelectorAll('.modes button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===m?'true':'false'))}
 const g=load('game');if(g==='ta'||g==='pr')game=g;
-count=({'2':2,'0':0})[load('count')]??1;look=load('look')==='seq'?'seq':'one';applyLook();applyCount();applyLevel();applyQlim();applyVol();applyAns();applyGame();showBest();idle();
+count=({'2':2,'0':0})[load('count')]??1;look=load('look')==='seq'?'seq':'one';applyLook();applyCount();applyLevel();applyQlim();applyVol();applyAns();applyGame();showBest();idle();renderFavs();
 </script>
 </body></html>
